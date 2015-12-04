@@ -53,8 +53,10 @@
 
         </script>
 
-        <script id="fragmentShader" type="x-shader/x-fragment">
+        <script id="raytracerShader" type="x-shader/x-fragment">
 
+            #define M_PI 3.141592653589793238462643383279
+            
             uniform vec2 resolution;
             uniform float time;
             
@@ -62,8 +64,10 @@
             uniform vec3 cam_x;
             uniform vec3 cam_y;
             uniform vec3 cam_z;
+            
+            uniform sampler2D bg_texture;
 
-            void main()    {
+            void main() {
 
                 vec2 p = -1.0 + 2.0 * gl_FragCoord.xy / resolution.xy;
                 
@@ -82,7 +86,13 @@
                     }
                 }
                 
-                gl_FragColor=vec4(col, col, col, 1.0);
+                vec4 color = vec4(col, col, col, 1.0);
+                
+                vec2 tex_coord = vec2(atan(ray.x,ray.y)/M_PI*0.5+0.5, asin(ray.z)/M_PI+0.5);
+                
+                color += texture2D(bg_texture, tex_coord);
+                
+                gl_FragColor = color;
             }
 
         </script>
@@ -92,13 +102,37 @@
             if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 
             var container, stats;
-
             var camera, scene, renderer, cameraControls;
-
             var uniforms;
 
             init();
             animate();
+            
+            function renderDataTexture(width, height, renderer) {
+                // Generate random noise texture
+                var size = width * height;
+                var data = new Uint8Array( 3 * size );
+                
+                function to8bit(f) {
+                    return Math.round(Math.max(0, Math.min(f, 1.0))*255);
+                }
+                
+                var i = 0;
+                for (var y=0; y<height; y++) {
+                    for (var x=0; x<width; x++) {
+                        var col = renderer(x/width,y/height);
+                        data[i++] = to8bit(col.r);
+                        data[i++] = to8bit(col.g);
+                        data[i++] = to8bit(col.b);
+                    }
+                }
+                
+                var dt = new THREE.DataTexture( data, width, height, THREE.RGBFormat);
+                dt.magFilter = THREE.LinearFilter;
+                dt.needsUpdate = true;
+                
+                return dt;
+            }
 
             function init() {
 
@@ -108,7 +142,6 @@
                 scene = new THREE.Scene();
 
                 var geometry = new THREE.PlaneBufferGeometry( 2, 2 );
-                
 
                 uniforms = {
                     time: { type: "f", value: 1.0 },
@@ -116,14 +149,29 @@
                     cam_pos: { type: "v3", value: new THREE.Vector3(0,0,-0.5) },
                     cam_x: { type: "v3", value: new THREE.Vector3(1,0,0) },
                     cam_y: { type: "v3", value: new THREE.Vector3(0,1,0) },
-                    cam_z: { type: "v3", value: new THREE.Vector3(0,0,1) }
+                    cam_z: { type: "v3", value: new THREE.Vector3(0,0,1) },
+                    bg_texture: { type: "t", value: renderDataTexture(1024*2, 1024, function(x,y) {
+                        
+                        var prob = 0.01 * Math.cos((y-0.5)*Math.PI);
+                        var s = Math.random()
+                        
+                        if (s < prob) {
+                            s /= prob;
+                            return { r: s, g: s, b: s };
+                        }
+                        
+                        //return { r: x, g: y, b: 0 };
+                        return { r: 0, g: 0, b: 0 };
+                        
+                        
+                    })}
                 };
 
                 var material = new THREE.ShaderMaterial( {
 
                     uniforms: uniforms,
                     vertexShader: document.getElementById( 'vertexShader' ).textContent,
-                    fragmentShader: document.getElementById( 'fragmentShader' ).textContent
+                    fragmentShader: document.getElementById( 'raytracerShader' ).textContent
 
                 } );
 
