@@ -87,7 +87,6 @@
                 }
                 
                 vec4 color = vec4(col, col, col, 1.0);
-                
                 vec2 tex_coord = vec2(atan(ray.x,ray.y)/M_PI*0.5+0.5, asin(ray.z)/M_PI+0.5);
                 
                 color += texture2D(bg_texture, tex_coord);
@@ -135,6 +134,8 @@
             }
 
             function init() {
+            
+                var TEXTURE_RESOLUTION = 1024;
 
                 container = document.createElement( 'div' );
                 document.body.appendChild( container );
@@ -150,9 +151,11 @@
                     cam_x: { type: "v3", value: new THREE.Vector3(1,0,0) },
                     cam_y: { type: "v3", value: new THREE.Vector3(0,1,0) },
                     cam_z: { type: "v3", value: new THREE.Vector3(0,0,1) },
-                    bg_texture: { type: "t", value: renderDataTexture(1024*2, 1024, function(x,y) {
+                    bg_texture: { type: "t", value: renderDataTexture(TEXTURE_RESOLUTION*2, TEXTURE_RESOLUTION, function(x,y) {
                         
-                        var prob = 0.01 * Math.cos((y-0.5)*Math.PI);
+                        var prob = 5.0 / TEXTURE_RESOLUTION;
+                        prob *= Math.cos((y-0.5)*Math.PI);
+                        
                         var s = Math.random()
                         
                         if (s < prob) {
@@ -160,10 +163,7 @@
                             return { r: s, g: s, b: s };
                         }
                         
-                        //return { r: x, g: y, b: 0 };
                         return { r: 0, g: 0, b: 0 };
-                        
-                        
                     })}
                 };
 
@@ -216,11 +216,14 @@
                 var dist = camera.position.length();
                 var m = camera.matrixWorldInverse.elements;
                 
-                uniforms.cam_x.value.set(m[0], m[4], m[8]);
-                uniforms.cam_y.value.set(m[1], m[5], m[9]);
-                uniforms.cam_z.value.set(m[2], m[6], m[10]);
+                // y and z swapped for a nicer coordinate system
+                uniforms.cam_x.value.set(m[0], m[8], m[4]);
+                uniforms.cam_y.value.set(m[1], m[9], m[5]);
+                uniforms.cam_z.value.set(m[2], m[10], m[6]);
                 
-                uniforms.cam_pos.value.set(-m[2]*dist, -m[6]*dist, -m[10]*dist);
+                var p = uniforms.cam_z.value;
+                
+                uniforms.cam_pos.value.set(-p.x*dist, -p.y*dist, -p.z*dist);
             }
 
             //
