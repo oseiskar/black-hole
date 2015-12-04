@@ -60,6 +60,7 @@
             uniform vec2 resolution;
             uniform float time;
             
+            uniform float fov_mult;
             uniform vec3 cam_pos;
             uniform vec3 cam_x;
             uniform vec3 cam_y;
@@ -72,7 +73,7 @@
                 vec2 p = -1.0 + 2.0 * gl_FragCoord.xy / resolution.xy;
                 
                 vec3 pos = cam_pos;
-                vec3 ray = normalize(p.x*cam_x + p.y*cam_y + 1.0*cam_z);
+                vec3 ray = normalize(p.x*cam_x + p.y*cam_y + fov_mult*cam_z);
                 
                 float step = 0.01;
                 float col = 0.0;
@@ -136,6 +137,7 @@
             function init() {
             
                 var TEXTURE_RESOLUTION = 1024;
+                var FOV_ANGLE_DEG = 60;
 
                 container = document.createElement( 'div' );
                 document.body.appendChild( container );
@@ -151,6 +153,7 @@
                     cam_x: { type: "v3", value: new THREE.Vector3(1,0,0) },
                     cam_y: { type: "v3", value: new THREE.Vector3(0,1,0) },
                     cam_z: { type: "v3", value: new THREE.Vector3(0,0,1) },
+                    fov_mult: { type: "f", value: 1.0 / Math.tan(FOV_ANGLE_DEG / 180 * Math.PI * 0.5) },
                     bg_texture: { type: "t", value: renderDataTexture(TEXTURE_RESOLUTION*2, TEXTURE_RESOLUTION, function(x,y) {
                         
                         var prob = 5.0 / TEXTURE_RESOLUTION;
