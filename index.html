@@ -61,13 +61,18 @@
 
             uniform vec2 resolution;
             uniform float time;
+            
+            uniform vec3 cam_pos;
+            uniform vec3 cam_x;
+            uniform vec3 cam_y;
+            uniform vec3 cam_z;
 
             void main()    {
 
                 vec2 p = -1.0 + 2.0 * gl_FragCoord.xy / resolution.xy;
                 
-                vec3 pos = vec3(0,0,-0.5);
-                vec3 ray = normalize(vec3(p.x, p.y, 1));
+                vec3 pos = cam_pos;
+                vec3 ray = normalize(p.x*cam_x + p.y*cam_y + 1.0*cam_z);
                 
                 float step = 0.01;
                 float col = 0.0;
@@ -76,7 +81,7 @@
                     
                     pos += ray*step; 
                     
-                    if (abs(pos.z) < 0.1 && abs(length(pos.xy)-0.3) < 0.1 + sin(time)*0.05) {
+                    if (abs(pos.z) < 0.1 && abs(length(pos.xy)-0.3) < 0.1 + sin(time*0.1)*0.05) {
                         col += 0.02;
                     }
                 }
@@ -113,7 +118,11 @@
 
                 uniforms = {
                     time: { type: "f", value: 1.0 },
-                    resolution: { type: "v2", value: new THREE.Vector2() }
+                    resolution: { type: "v2", value: new THREE.Vector2() },
+                    cam_pos: { type: "v3", value: new THREE.Vector3(0,0,-0.5) },
+                    cam_x: { type: "v3", value: new THREE.Vector3(1,0,0) },
+                    cam_y: { type: "v3", value: new THREE.Vector3(0,1,0) },
+                    cam_z: { type: "v3", value: new THREE.Vector3(0,0,1) }
                 };
 
                 var material = new THREE.ShaderMaterial( {
