@@ -35,15 +35,13 @@
             <a href="http://threejs.org" target="_blank">three.js</a> - fragment shader<br />
         </div>
 
+        <script src="three-js/jquery-2.1.4.min.js"></script>
         <script src="three-js/three.min.js"></script>
-
         <script src="three-js/OrbitControls.js"></script>
-
         <script src="three-js/Detector.js"></script>
-        
         <script src="three-js/stats.min.js"></script>
 
-        <script id="vertexShader" type="x-shader/x-vertex">
+        <script id="vertex-shader" type="x-shader/x-vertex">
 
             void main()    {
 
@@ -52,204 +50,10 @@
             }
 
         </script>
-
-        <script id="raytracerShader" type="x-shader/x-fragment">
-
-            #define M_PI 3.141592653589793238462643383279
-            
-            uniform vec2 resolution;
-            uniform float time;
-            
-            uniform float fov_mult;
-            uniform vec3 cam_pos;
-            uniform vec3 cam_x;
-            uniform vec3 cam_y;
-            uniform vec3 cam_z;
-            
-            uniform sampler2D bg_texture;
-
-            void main() {
-
-                vec2 p = -1.0 + 2.0 * gl_FragCoord.xy / resolution.xy;
-                
-                vec3 pos = cam_pos;
-                vec3 ray = normalize(p.x*cam_x + p.y*cam_y + fov_mult*cam_z);
-                
-                float step = 0.01;
-                float col = 0.0;
-                
-                for (int j=0; j < 200; j++) {
-                    
-                    pos += ray*step; 
-                    
-                    if (abs(pos.z) < 0.1 && abs(length(pos.xy)-0.3) < 0.1 + sin(time*0.1)*0.05) {
-                        col += 0.02;
-                    }
-                }
-                
-                vec4 color = vec4(col, col, col, 1.0);
-                vec2 tex_coord = vec2(atan(ray.x,ray.y)/M_PI*0.5+0.5, asin(ray.z)/M_PI+0.5);
-                
-                color += texture2D(bg_texture, tex_coord);
-                
-                gl_FragColor = color;
-            }
-
-        </script>
-
-        <script>
-
-            if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
-
-            var container, stats;
-            var camera, scene, renderer, cameraControls;
-            var uniforms;
-
-            init();
-            animate();
-            
-            function renderDataTexture(width, height, renderer) {
-                // Generate random noise texture
-                var size = width * height;
-                var data = new Uint8Array( 3 * size );
-                
-                function to8bit(f) {
-                    return Math.round(Math.max(0, Math.min(f, 1.0))*255);
-                }
-                
-                var i = 0;
-                for (var y=0; y<height; y++) {
-                    for (var x=0; x<width; x++) {
-                        var col = renderer(x/width,y/height);
-                        data[i++] = to8bit(col.r);
-                        data[i++] = to8bit(col.g);
-                        data[i++] = to8bit(col.b);
-                    }
-                }
-                
-                var dt = new THREE.DataTexture( data, width, height, THREE.RGBFormat);
-                dt.magFilter = THREE.LinearFilter;
-                dt.needsUpdate = true;
-                
-                return dt;
-            }
-
-            function init() {
-            
-                var TEXTURE_RESOLUTION = 1024;
-                var FOV_ANGLE_DEG = 60;
-
-                container = document.createElement( 'div' );
-                document.body.appendChild( container );
-
-                scene = new THREE.Scene();
-
-                var geometry = new THREE.PlaneBufferGeometry( 2, 2 );
-
-                uniforms = {
-                    time: { type: "f", value: 1.0 },
-                    resolution: { type: "v2", value: new THREE.Vector2() },
-                    cam_pos: { type: "v3", value: new THREE.Vector3(0,0,-0.5) },
-                    cam_x: { type: "v3", value: new THREE.Vector3(1,0,0) },
-                    cam_y: { type: "v3", value: new THREE.Vector3(0,1,0) },
-                    cam_z: { type: "v3", value: new THREE.Vector3(0,0,1) },
-                    fov_mult: { type: "f", value: 1.0 / Math.tan(FOV_ANGLE_DEG / 180 * Math.PI * 0.5) },
-                    bg_texture: { type: "t", value: renderDataTexture(TEXTURE_RESOLUTION*2, TEXTURE_RESOLUTION, function(x,y) {
-                        
-                        var prob = 5.0 / TEXTURE_RESOLUTION;
-                        prob *= Math.cos((y-0.5)*Math.PI);
-                        
-                        var s = Math.random()
-                        
-                        if (s < prob) {
-                            s /= prob;
-                            return { r: s, g: s, b: s };
-                        }
-                        
-                        return { r: 0, g: 0, b: 0 };
-                    })}
-                };
-
-                var material = new THREE.ShaderMaterial( {
-
-                    uniforms: uniforms,
-                    vertexShader: document.getElementById( 'vertexShader' ).textContent,
-                    fragmentShader: document.getElementById( 'raytracerShader' ).textContent
-
-                } );
-
-                var mesh = new THREE.Mesh( geometry, material );
-                scene.add( mesh );
-
-                renderer = new THREE.WebGLRenderer();
-                renderer.setPixelRatio( window.devicePixelRatio );
-                container.appendChild( renderer.domElement );
-
-                stats = new Stats();
-                stats.domElement.style.position = 'absolute';
-                stats.domElement.style.top = '0px';
-                container.appendChild( stats.domElement );
-                
-                // Orbit camera from three.js
-                camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 80000 );
-                camera.position.z = 1;
-                updateCamera();
-                
-                cameraControls = new THREE.OrbitControls( camera, renderer.domElement );
-                cameraControls.target.set( 0, 0, 0 );
-                cameraControls.addEventListener( 'change', updateCamera );
-
-                onWindowResize();
-
-                window.addEventListener( 'resize', onWindowResize, false );
-
-            }
-
-            function onWindowResize( event ) {
-
-                renderer.setSize( window.innerWidth, window.innerHeight );
-
-                uniforms.resolution.value.x = renderer.domElement.width;
-                uniforms.resolution.value.y = renderer.domElement.height;
-
-            }
-            
-            function updateCamera( event ) {
-                
-                var dist = camera.position.length();
-                var m = camera.matrixWorldInverse.elements;
-                
-                // y and z swapped for a nicer coordinate system
-                uniforms.cam_x.value.set(m[0], m[8], m[4]);
-                uniforms.cam_y.value.set(m[1], m[9], m[5]);
-                uniforms.cam_z.value.set(m[2], m[10], m[6]);
-                
-                var p = uniforms.cam_z.value;
-                
-                uniforms.cam_pos.value.set(-p.x*dist, -p.y*dist, -p.z*dist);
-            }
-
-            //
-
-            function animate() {
-
-                requestAnimationFrame( animate );
-
-                render();
-                stats.update();
-
-            }
-
-            function render() {
-
-                uniforms.time.value += 0.05;
-
-                renderer.render( scene, camera );
-
-            }
-
-
-        </script>
+        <script data-src="raytracer.glsl" data-name="raytracer" type="x-shader/x-fragment"></script>
+        
+        <script src="three-js/ShaderLoader.min.js"></script>
+        <script src="main.js"></script>
 
     </body>
 </html>
