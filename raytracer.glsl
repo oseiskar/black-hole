@@ -14,6 +14,7 @@ uniform sampler2D bg_texture;
 void main() {
 
     vec2 p = -1.0 + 2.0 * gl_FragCoord.xy / resolution.xy;
+    p.y *= resolution.y / resolution.x;
     
     vec3 pos = cam_pos;
     vec3 ray = normalize(p.x*cam_x + p.y*cam_y + fov_mult*cam_z);

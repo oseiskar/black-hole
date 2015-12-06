@@ -38,7 +38,7 @@ function renderDataTexture(width, height, renderer) {
 
 function init(shaders) {
 
-    var TEXTURE_RESOLUTION = 1024;
+    var TEXTURE_RESOLUTION = 2*1024;
     var FOV_ANGLE_DEG = 60;
 
     container = document.createElement( 'div' );
@@ -107,47 +107,47 @@ function init(shaders) {
 
 }
 
-            function onWindowResize( event ) {
+function onWindowResize( event ) {
 
-                renderer.setSize( window.innerWidth, window.innerHeight );
+    renderer.setSize( window.innerWidth, window.innerHeight );
 
-                uniforms.resolution.value.x = renderer.domElement.width;
-                uniforms.resolution.value.y = renderer.domElement.height;
+    uniforms.resolution.value.x = renderer.domElement.width;
+    uniforms.resolution.value.y = renderer.domElement.height;
 
-            }
-            
-            function updateCamera( event ) {
-                
-                var dist = camera.position.length();
-                var m = camera.matrixWorldInverse.elements;
-                
-                // y and z swapped for a nicer coordinate system
-                uniforms.cam_x.value.set(m[0], m[8], m[4]);
-                uniforms.cam_y.value.set(m[1], m[9], m[5]);
-                uniforms.cam_z.value.set(m[2], m[10], m[6]);
-                
-                var p = uniforms.cam_z.value;
-                
-                uniforms.cam_pos.value.set(-p.x*dist, -p.y*dist, -p.z*dist);
-            }
+}
 
-            //
+function updateCamera( event ) {
+    
+    var dist = camera.position.length() * 10;
+    var m = camera.matrixWorldInverse.elements;
+    
+    // y and z swapped for a nicer coordinate system
+    uniforms.cam_x.value.set(m[0], m[8], m[4]);
+    uniforms.cam_y.value.set(m[1], m[9], m[5]);
+    uniforms.cam_z.value.set(m[2], m[10], m[6]);
+    
+    var p = uniforms.cam_z.value;
+    
+    uniforms.cam_pos.value.set(-p.x*dist, -p.y*dist, -p.z*dist);
+}
 
-            function animate() {
+//
 
-                requestAnimationFrame( animate );
+function animate() {
 
-                render();
-                stats.update();
+    requestAnimationFrame( animate );
 
-            }
+    render();
+    stats.update();
 
-            function render() {
+}
 
-                uniforms.time.value += 0.05;
+function render() {
 
-                renderer.render( scene, camera );
+    uniforms.time.value += 0.05;
 
-            }
+    renderer.render( scene, camera );
+
+}
 
 
