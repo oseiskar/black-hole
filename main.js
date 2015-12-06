@@ -5,6 +5,10 @@ var container, stats;
 var camera, scene, renderer, cameraControls;
 var uniforms;
 
+var TEXTURE_RESOLUTION = 2*1024;
+
+function degToRad(a) { return Math.PI * a / 180.0; }
+
 SHADER_LOADER.load(function(shaders) {
     init(shaders);
     animate();
@@ -38,7 +42,6 @@ function renderDataTexture(width, height, renderer) {
 
 function init(shaders) {
 
-    var TEXTURE_RESOLUTION = 2*1024;
     var FOV_ANGLE_DEG = 60;
 
     container = document.createElement( 'div' );
@@ -55,21 +58,16 @@ function init(shaders) {
         cam_x: { type: "v3", value: new THREE.Vector3(1,0,0) },
         cam_y: { type: "v3", value: new THREE.Vector3(0,1,0) },
         cam_z: { type: "v3", value: new THREE.Vector3(0,0,1) },
-        fov_mult: { type: "f", value: 1.0 / Math.tan(FOV_ANGLE_DEG / 180 * Math.PI * 0.5) },
-        bg_texture: { type: "t", value: renderDataTexture(TEXTURE_RESOLUTION*2, TEXTURE_RESOLUTION, function(x,y) {
-            
-            var prob = 5.0 / TEXTURE_RESOLUTION;
-            prob *= Math.cos((y-0.5)*Math.PI);
-            
-            var s = Math.random()
-            
-            if (s < prob) {
-                s /= prob;
-                return { r: s, g: s, b: s };
-            }
-            
-            return { r: 0, g: 0, b: 0 };
-        })}
+        fov_mult: { type: "f", value: 1.0 / Math.tan(degToRad(FOV_ANGLE_DEG*0.5)) },
+        bg_texture: {
+            type: "t",
+            value: renderDataTexture(TEXTURE_RESOLUTION*2, TEXTURE_RESOLUTION, starBackgroundTexture)
+        },
+        
+        accretion_disk_texture: {
+            type: "t",
+            value: renderDataTexture(TEXTURE_RESOLUTION, 1, accretionDiskTexture1D)
+        }
     };
 
     var material = new THREE.ShaderMaterial( {
@@ -94,17 +92,48 @@ function init(shaders) {
     
     // Orbit camera from three.js
     camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 80000 );
-    camera.position.z = 1;
+    initializeCamera(camera, 20.0, 15.0);
+    
+    console.log(camera.position);
+    console.log(camera.matrixWorldInverse.elements);
+    
+    //camera.up = new THREE.Vector3(0,1,0);
+    //camera.lookAt(new THREE.Vector3(0,0,0));
+    //camera.lookAt(new THREE.Vector3(0,0,0));
+    //camera.update();
+    //camera.updateMatrixWorld(true);
+    //camera.rotateOnAxis(new THREE.Vector3(1,0,0), Math.pi * 0.3);
     updateCamera();
     
     cameraControls = new THREE.OrbitControls( camera, renderer.domElement );
     cameraControls.target.set( 0, 0, 0 );
     cameraControls.addEventListener( 'change', updateCamera );
+    updateCamera();
 
     onWindowResize();
 
     window.addEventListener( 'resize', onWindowResize, false );
 
+}
+
+function starBackgroundTexture(x,y) {
+            
+    var prob = 5.0 / TEXTURE_RESOLUTION;
+    prob *= Math.cos((y-0.5)*Math.PI);
+    
+    var s = Math.random()
+    
+    if (s < prob) {
+        s /= prob;
+        return { r: s, g: s, b: s };
+    }
+    
+    return { r: 0, g: 0, b: 0 };
+}
+
+function accretionDiskTexture1D(x, y) {
+    var s = x*Math.exp(-x*4.0)*(1.0-x) * 4.0 * Math.pow((Math.sin(x*100.0)+1.0)*0.5,0.1);
+    return { r: s, g: s, b: s };
 }
 
 function onWindowResize( event ) {
@@ -116,9 +145,20 @@ function onWindowResize( event ) {
 
 }
 
+function initializeCamera(camera, angle, dist) {
+    
+    // there are nicely named methods such as "lookAt" in the camera object
+    // but there do not do a thing to the projection matrix due to an internal
+    // representation of the camera coordinates using a quaternion (nice)
+    var a = degToRad(-angle);
+    camera.matrixWorldInverse.makeRotationX(a);
+    
+    camera.position.set(0,Math.sin(a)*dist,Math.cos(a)*dist);
+}
+
 function updateCamera( event ) {
     
-    var dist = camera.position.length() * 10;
+    var dist = camera.position.length();
     var m = camera.matrixWorldInverse.elements;
     
     // y and z swapped for a nicer coordinate system
@@ -131,23 +171,14 @@ function updateCamera( event ) {
     uniforms.cam_pos.value.set(-p.x*dist, -p.y*dist, -p.z*dist);
 }
 
-//
-
 function animate() {
-
     requestAnimationFrame( animate );
 
     render();
     stats.update();
-
 }
 
 function render() {
-
     uniforms.time.value += 0.05;
-
     renderer.render( scene, camera );
-
 }
-
-
