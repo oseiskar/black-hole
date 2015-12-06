@@ -94,17 +94,6 @@ function init(shaders) {
     camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 80000 );
     initializeCamera(camera, 20.0, 15.0);
     
-    console.log(camera.position);
-    console.log(camera.matrixWorldInverse.elements);
-    
-    //camera.up = new THREE.Vector3(0,1,0);
-    //camera.lookAt(new THREE.Vector3(0,0,0));
-    //camera.lookAt(new THREE.Vector3(0,0,0));
-    //camera.update();
-    //camera.updateMatrixWorld(true);
-    //camera.rotateOnAxis(new THREE.Vector3(1,0,0), Math.pi * 0.3);
-    updateCamera();
-    
     cameraControls = new THREE.OrbitControls( camera, renderer.domElement );
     cameraControls.target.set( 0, 0, 0 );
     cameraControls.addEventListener( 'change', updateCamera );
@@ -132,8 +121,8 @@ function starBackgroundTexture(x,y) {
 }
 
 function accretionDiskTexture1D(x, y) {
-    var s = x*Math.exp(-x*4.0)*(1.0-x) * 4.0 * Math.pow((Math.sin(x*100.0)+1.0)*0.5,0.1);
-    return { r: s, g: s, b: s };
+    var s = x*Math.exp(-x*4.0)*(1.0-x) * Math.pow((Math.sin(x*100.0)+1.0)*0.5,0.1) * 10.0;
+    return { r: s, g: s*0.8, b: s*0.6 };
 }
 
 function onWindowResize( event ) {
