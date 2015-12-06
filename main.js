@@ -42,7 +42,7 @@ function renderDataTexture(width, height, renderer) {
 
 function init(shaders) {
 
-    var FOV_ANGLE_DEG = 60;
+    var FOV_ANGLE_DEG = 90;
 
     container = document.createElement( 'div' );
     document.body.appendChild( container );
@@ -59,7 +59,7 @@ function init(shaders) {
         cam_y: { type: "v3", value: new THREE.Vector3(0,1,0) },
         cam_z: { type: "v3", value: new THREE.Vector3(0,0,1) },
         fov_mult: { type: "f", value: 1.0 / Math.tan(degToRad(FOV_ANGLE_DEG*0.5)) },
-        bg_texture: {
+        star_texture: {
             type: "t",
             value: renderDataTexture(TEX_RES*2, TEX_RES, starBackgroundTexture)
         },
@@ -67,6 +67,11 @@ function init(shaders) {
         accretion_disk_texture: {
             type: "t",
             value: renderDataTexture(TEX_RES, TEX_RES/4, accretionDiskTexture1D)
+        },
+        
+        galaxy_texture: {
+            type: "t",
+            value: THREE.ImageUtils.loadTexture('img/milkyway.jpg')
         }
     };
 
@@ -137,16 +142,19 @@ function onWindowResize( event ) {
 
 function initializeCamera(camera) {
     
-    var angle = 10.0;
-    var dist = 20.0
+    var pitchAngle = 10.0, yawAngle = 115.0;
+    var dist = 20.0;
     
     // there are nicely named methods such as "lookAt" in the camera object
     // but there do not do a thing to the projection matrix due to an internal
     // representation of the camera coordinates using a quaternion (nice)
-    var a = degToRad(-angle);
-    camera.matrixWorldInverse.makeRotationX(a);
+    camera.matrixWorldInverse.makeRotationX(degToRad(-pitchAngle));
+    camera.matrixWorldInverse.multiply(new THREE.Matrix4().makeRotationY(degToRad(-yawAngle)));
     
-    camera.position.set(0,Math.sin(a)*dist,Math.cos(a)*dist);
+    var m = camera.matrixWorldInverse.elements;
+    console.log(m);
+    
+    camera.position.set(m[2]*dist, m[6]*dist, m[10]*dist);
 }
 
 function updateCamera( event ) {
