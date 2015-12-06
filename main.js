@@ -51,8 +51,6 @@ function init(shaders) {
 
     var geometry = new THREE.PlaneBufferGeometry( 2, 2 );
 
-    
-
     uniforms = {
         time: { type: "f", value: 1.0 },
         resolution: { type: "v2", value: new THREE.Vector2() },
@@ -94,7 +92,7 @@ function init(shaders) {
     
     // Orbit camera from three.js
     camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 80000 );
-    initializeCamera(camera, 20.0, 15.0);
+    initializeCamera(camera);
     
     cameraControls = new THREE.OrbitControls( camera, renderer.domElement );
     cameraControls.target.set( 0, 0, 0 );
@@ -123,7 +121,7 @@ function starBackgroundTexture(x,y) {
 }
 
 function accretionDiskTexture1D(x, y) {
-    var s = x*Math.exp(-x*4.0)*(1.0-x) * Math.pow((Math.sin(x*Math.PI*20)+1.0)*0.5,0.1) * 10.0;
+    var s = x*Math.exp(-x*4.0)*(1.0-x) * Math.pow((Math.sin(x*Math.PI*20)+1.0)*0.5,0.1) * 20.0;
     if (Math.ceil(y*50)%2 == 0) s *= 0.7;
     return { r: s, g: s*0.8, b: s*0.5 };
 }
@@ -137,7 +135,10 @@ function onWindowResize( event ) {
 
 }
 
-function initializeCamera(camera, angle, dist) {
+function initializeCamera(camera) {
+    
+    var angle = 10.0;
+    var dist = 20.0
     
     // there are nicely named methods such as "lookAt" in the camera object
     // but there do not do a thing to the projection matrix due to an internal
