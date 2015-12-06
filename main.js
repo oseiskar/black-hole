@@ -5,7 +5,7 @@ var container, stats;
 var camera, scene, renderer, cameraControls;
 var uniforms;
 
-var TEXTURE_RESOLUTION = 2*1024;
+var TEX_RES = 2*1024;
 
 function degToRad(a) { return Math.PI * a / 180.0; }
 
@@ -51,6 +51,8 @@ function init(shaders) {
 
     var geometry = new THREE.PlaneBufferGeometry( 2, 2 );
 
+    
+
     uniforms = {
         time: { type: "f", value: 1.0 },
         resolution: { type: "v2", value: new THREE.Vector2() },
@@ -61,12 +63,12 @@ function init(shaders) {
         fov_mult: { type: "f", value: 1.0 / Math.tan(degToRad(FOV_ANGLE_DEG*0.5)) },
         bg_texture: {
             type: "t",
-            value: renderDataTexture(TEXTURE_RESOLUTION*2, TEXTURE_RESOLUTION, starBackgroundTexture)
+            value: renderDataTexture(TEX_RES*2, TEX_RES, starBackgroundTexture)
         },
         
         accretion_disk_texture: {
             type: "t",
-            value: renderDataTexture(TEXTURE_RESOLUTION, 1, accretionDiskTexture1D)
+            value: renderDataTexture(TEX_RES, TEX_RES/4, accretionDiskTexture1D)
         }
     };
 
@@ -107,7 +109,7 @@ function init(shaders) {
 
 function starBackgroundTexture(x,y) {
             
-    var prob = 5.0 / TEXTURE_RESOLUTION;
+    var prob = 5.0 / TEX_RES;
     prob *= Math.cos((y-0.5)*Math.PI);
     
     var s = Math.random()
@@ -121,8 +123,9 @@ function starBackgroundTexture(x,y) {
 }
 
 function accretionDiskTexture1D(x, y) {
-    var s = x*Math.exp(-x*4.0)*(1.0-x) * Math.pow((Math.sin(x*100.0)+1.0)*0.5,0.1) * 10.0;
-    return { r: s, g: s*0.8, b: s*0.6 };
+    var s = x*Math.exp(-x*4.0)*(1.0-x) * Math.pow((Math.sin(x*Math.PI*20)+1.0)*0.5,0.1) * 10.0;
+    if (Math.ceil(y*50)%2 == 0) s *= 0.7;
+    return { r: s, g: s*0.8, b: s*0.5 };
 }
 
 function onWindowResize( event ) {

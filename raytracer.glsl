@@ -67,7 +67,10 @@ void main() {
             
             if (r > ACCRETION_MIN_R) {
                 color += texture2D(accretion_disk_texture,
-                    vec2((r-ACCRETION_MIN_R)/ACCRETION_WIDTH,0.0));
+                    vec2(
+                        (r-ACCRETION_MIN_R)/ACCRETION_WIDTH,
+                        atan(isec.x, isec.y)/M_PI*0.5+0.5
+                    ));
             }
         }
         
