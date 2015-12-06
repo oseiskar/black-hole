@@ -26,19 +26,19 @@ void main() {
     vec3 n = normalize(cross(pos, ray));
     vec3 x = normalize(pos);
     vec3 y = cross(n,x);
-    float du = -dot(ray,x) / dot(ray,y) * u * u * u;
+    float du = -dot(ray,x) / dot(ray,y) * u;
     
-    float theta = acos(-dot(x,ray)) - M_PI*0.5;
+    float theta = M_PI*0.5 - acos(dot(x,ray));
     y = ray;
-    x = cross(n,y);
+    x = cross(y,n);
     
     vec3 old_pos;
     
-    const int NSTEPS = 200;
+    const int NSTEPS = 300;
     
     for (int j=0; j < NSTEPS; j++) {
         
-        step = 2.0*M_PI / float(NSTEPS);
+        step = 2.0 * 2.0*M_PI / float(NSTEPS);
     
         float ddu = -u*(1.0 - 1.5*u*u);
         u += du*step;
@@ -55,18 +55,19 @@ void main() {
         if (abs(pos.z) < 0.1 && abs(length(pos.xy)-0.3) < 0.1 + sin(time*0.1)*0.05) {
             col += 0.02;
         }
+        
+        if (u > 10.0) break;
     }
     
-    float ang = atan(-du / (u*u*u));
-    ray = cos(theta)*x + sin(theta)*y;
-    ray = sin(ang) * ray + cos(ang) * cross(ray,n);
-    
-    //ray = normalize(pos - old_pos);
-    
     vec4 color = vec4(col, col, col, 1.0);
-    vec2 tex_coord = vec2(atan(ray.x,ray.y)/M_PI*0.5+0.5, asin(ray.z)/M_PI+0.5);
-    
-    color += texture2D(bg_texture, tex_coord);
+        
+    // the event horizon is at u = 1
+    if (u < 1.0) { 
+        ray = normalize(pos - old_pos);
+        vec2 tex_coord = vec2(atan(ray.x,ray.y)/M_PI*0.5+0.5, asin(ray.z)/M_PI+0.5);
+        
+        color += texture2D(bg_texture, tex_coord);
+    }
     
     gl_FragColor = color;
 }
