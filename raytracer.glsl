@@ -26,19 +26,25 @@ void main() {
     vec3 n = normalize(cross(pos, ray));
     vec3 x = normalize(pos);
     vec3 y = cross(n,x);
-    
     float du = -dot(ray,x) / dot(ray,y) * u * u * u;
     
-    float theta = 0.0;
+    float theta = acos(-dot(x,ray)) - M_PI*0.5;
+    y = ray;
+    x = cross(n,y);
     
     vec3 old_pos;
     
-    for (int j=0; j < 100; j++) {
+    const int NSTEPS = 200;
+    
+    for (int j=0; j < NSTEPS; j++) {
         
-        step = 0.01;
+        step = 2.0*M_PI / float(NSTEPS);
     
         float ddu = -u*(1.0 - 1.5*u*u);
         u += du*step;
+        
+        if (u < 0.0) break;
+        
         du += ddu*step;
         
         theta += step;
