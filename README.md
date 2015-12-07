@@ -1,6 +1,8 @@
-### Ray-traced simulation of a black hole with [three.js](http://threejs.org)
+### Ray-traced simulation of a black hole
 
-The gravitational lensing effect should look "real" (light paths are obtained by integrating an ODE describing the Schwarzschild geodesics). Accretion disk shape and colors are fake (surprised?)
+* The gravitational lensing effect should look "real": light paths are obtained by integrating an ODE describing the Schwarzschild geodesics (using GLSL on the GPU)
+* Accretion disk colors are fake (surprised?)
+* Uses [three.js](http://threejs.org)
 
 **Some source material**
 
