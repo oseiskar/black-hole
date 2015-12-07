@@ -2,7 +2,7 @@
 #define R_SQRT_2 0.7071067811865475
 
 uniform vec2 resolution;
-uniform float time;
+//uniform float time;
 
 uniform float fov_mult;
 uniform vec3 cam_pos;

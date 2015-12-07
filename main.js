@@ -9,9 +9,13 @@ var TEX_RES = 2*1024;
 
 function degToRad(a) { return Math.PI * a / 180.0; }
 
+
+
 SHADER_LOADER.load(function(shaders) {
-    init(shaders);
-    animate();
+    new THREE.TextureLoader().load('img/milkyway.jpg', function(tex) {
+        init(shaders, {galaxy: tex});
+        animate();
+    });
 });
 
 function renderDataTexture(width, height, renderer) {
@@ -40,7 +44,7 @@ function renderDataTexture(width, height, renderer) {
     return dt;
 }
 
-function init(shaders) {
+function init(shaders, textures) {
 
     var FOV_ANGLE_DEG = 90;
 
@@ -71,7 +75,7 @@ function init(shaders) {
         
         galaxy_texture: {
             type: "t",
-            value: THREE.ImageUtils.loadTexture('img/milkyway.jpg')
+            value: textures.galaxy
         }
     };
 
@@ -152,7 +156,6 @@ function initializeCamera(camera) {
     camera.matrixWorldInverse.multiply(new THREE.Matrix4().makeRotationY(degToRad(-yawAngle)));
     
     var m = camera.matrixWorldInverse.elements;
-    console.log(m);
     
     camera.position.set(m[2]*dist, m[6]*dist, m[10]*dist);
 }
@@ -172,12 +175,29 @@ function updateCamera( event ) {
     uniforms.cam_pos.value.set(-p.x*dist, -p.y*dist, -p.z*dist);
 }
 
+function frobeniusDistance(matrix1, matrix2) {
+    var sum = 0.0;
+    for (i in matrix1.elements) {
+        var diff = matrix1.elements[i] - matrix2.elements[i];
+        sum += diff*diff;
+    }
+    return Math.sqrt(sum);
+}
+
 function animate() {
     requestAnimationFrame( animate );
-
-    render();
+    
+    camera.updateMatrixWorld();
+    camera.matrixWorldInverse.getInverse( camera.matrixWorld );
+        
+    if (frobeniusDistance(camera.matrixWorldInverse, lastCameraMat) > 1e-10) {
+        render();
+        lastCameraMat = camera.matrixWorldInverse.clone();
+    }
     stats.update();
 }
+
+var lastCameraMat = new THREE.Matrix4().identity();
 
 function render() {
     uniforms.time.value += 0.05;
