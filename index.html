@@ -7,23 +7,35 @@
         <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
         <style>
             body {
-                color: #fff;
-                font-family: Monospace;
-                font-size: 13px;
-                text-align: center;
-                font-weight: bold;
-
                 background-color: #000;
                 margin: 0px;
                 overflow: hidden;
+                
+                color: #fff;
+                font-family: Monospace;
+                font-size: 13px;
+                font-weight: bold;
             }
 
             #info {
+                text-align: center;
+                
                 position: absolute;
                 padding: 10px;
                 width: 100%;
                 text-align: center;
                 color: #fff;
+            }
+
+            #loader {
+                margin-top: 20%;
+            }
+            
+            .muted {
+                margin-top: 1em;
+                
+                font-weight: normal;
+                color: gray;
             }
 
             a { color: white; }
@@ -32,8 +44,16 @@
     </head>
     <body>
         <div id="info">
-            <a href="https://github.com/oseiskar/black-hole" target="_blank">Schwarzschild black hole</a><br/>
-            Drag to rotate<br/>
+            <a href="https://github.com/oseiskar/black-hole" target="_blank">Schwarzschild black hole</a>
+            <div class="muted">(Drag to rotate)</div>
+        
+            <div id="loader">
+                Loading...
+                <div class="muted">
+                This is a WebGL demo and very unlikely to work unless you run
+                a recent variant of Chrome or Firefox
+                </div>
+            </div>
         </div>
 
         <script src="js-libs/jquery-2.1.4.min.js"></script>

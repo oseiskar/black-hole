@@ -9,11 +9,10 @@ var TEX_RES = 2*1024;
 
 function degToRad(a) { return Math.PI * a / 180.0; }
 
-
-
 SHADER_LOADER.load(function(shaders) {
     new THREE.TextureLoader().load('img/milkyway.jpg', function(tex) {
         init(shaders, {galaxy: tex});
+        $('#loader').hide();
         animate();
     });
 });
