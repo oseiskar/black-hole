@@ -12,7 +12,7 @@ uniform vec3 cam_z;
 
 uniform sampler2D galaxy_texture, star_texture, accretion_disk_texture;
 
-const int NSTEPS = 200;
+const int NSTEPS = 100;
 const float ACCRETION_MIN_R = 1.5;
 const float ACCRETION_WIDTH = 5.0;
 const float ACCRETION_BRIGHTNESS = 2.0;
