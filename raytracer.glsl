@@ -43,11 +43,7 @@ void main() {
     vec3 x = normalize(pos);
     vec3 y = cross(n,x);
     float du = -dot(ray,x) / dot(ray,y) * u;
-    
-    
-    float theta = M_PI*0.5 - acos(dot(x,ray));
-    y = ray;
-    x = cross(y,n);
+    float theta = 0.0;
     
     vec3 old_pos;
     
@@ -88,7 +84,7 @@ void main() {
             }
         }
         
-        if (u > 10.0) break;
+        if (u > 2.0) break;
     }
         
     // the event horizon is at u = 1
