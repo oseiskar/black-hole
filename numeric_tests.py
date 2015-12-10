@@ -39,8 +39,7 @@ def trace_u(pos, ray, path):
 
         ddu = -u*(1.0 - 1.5*u*u)
         
-        if u < 1.0:
-            t += sqrt((ddu*ddu + u*u)/(1.0-u))/(u*u)*step
+        if u < 1.0: dt = sqrt(du*du + u*u*(1.0-u))/(u*u*(1.0-u))*step
         
         u += du*step
 
@@ -54,6 +53,11 @@ def trace_u(pos, ray, path):
         pos = (cos(theta)*x + sin(theta)*y)/u
         
         if u > 1.0: break # even horizon is at 1
+        
+        # Far away, dr/dtheta becomes large and dt inaccurate:
+        # Then just use a classical formula (no Shapiro delay)
+        if u < 1.0/10.0: dt = length(pos-old_pos)
+        t += dt
 
 
 # ---- plotting helpers        
