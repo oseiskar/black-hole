@@ -63,6 +63,7 @@ void main() {
         old_pos = pos;
         pos = (cos(theta)*x + sin(theta)*y)/u;
         
+        {{#accretion_disk}}
         if (old_pos.z * pos.z < 0.0) {
             // crossed plane z=0
             
@@ -71,6 +72,7 @@ void main() {
             
             
             float r = length(isec);
+            
             
             if (r > ACCRETION_MIN_R) {
                 color += texture2D(accretion_disk_texture,
@@ -83,6 +85,7 @@ void main() {
                 //if (r < ACCRETION_MIN_R+ACCRETION_WIDTH) { u = 1.5; break; }
             }
         }
+        {{/accretion_disk}}
         
         if (u > 2.0) break;
     }

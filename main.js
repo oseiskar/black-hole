@@ -2,16 +2,30 @@
 if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 
 var container, stats;
-var camera, scene, renderer, cameraControls;
+var camera, scene, renderer, cameraControls, shader;
 var uniforms;
 
 var TEX_RES = 2*1024;
+
+function Shader(mustacheTemplate) {
+    // Compile-time shader parameters
+    this.parameters = {
+        accretion_disk: true
+    }
+    var that = this;
+    this.needsUpdate = false;
+    
+    this.compile = function() {
+        return Mustache.render(mustacheTemplate, that.parameters);
+    }
+}
 
 function degToRad(a) { return Math.PI * a / 180.0; }
 
 SHADER_LOADER.load(function(shaders) {
     new THREE.TextureLoader().load('img/milkyway.jpg', function(tex) {
-        init(shaders, {galaxy: tex});
+        shader = new Shader(shaders.raytracer.fragment);
+        init(shader, {galaxy: tex});
         $('#loader').hide();
         animate();
     });
@@ -43,7 +57,7 @@ function renderDataTexture(width, height, renderer) {
     return dt;
 }
 
-function init(shaders, textures) {
+function init(fragmentShader, textures) {
 
     var FOV_ANGLE_DEG = 90;
 
@@ -82,9 +96,15 @@ function init(shaders, textures) {
 
         uniforms: uniforms,
         vertexShader: $('#vertex-shader').text(),
-        fragmentShader: shaders.raytracer.fragment
-
     } );
+    
+    scene.updateShader = function() {
+        material.fragmentShader = fragmentShader.compile();
+        material.needsUpdate = true;
+        fragmentShader.needsUpdate = true;
+    };
+    
+    scene.updateShader();
 
     var mesh = new THREE.Mesh( geometry, material );
     scene.add( mesh );
@@ -110,7 +130,16 @@ function init(shaders, textures) {
     onWindowResize();
 
     window.addEventListener( 'resize', onWindowResize, false );
+    
+    setupGUI();
+}
 
+function setupGUI() {
+    
+    function updateShader() { scene.updateShader(); }
+    
+    var gui = new dat.GUI();
+    gui.add(shader.parameters, 'accretion_disk').onChange(updateShader);
 }
 
 function starBackgroundTexture(x,y) {
@@ -189,7 +218,7 @@ function animate() {
     camera.updateMatrixWorld();
     camera.matrixWorldInverse.getInverse( camera.matrixWorld );
         
-    if (frobeniusDistance(camera.matrixWorldInverse, lastCameraMat) > 1e-10) {
+    if (shader.needsUpdate || frobeniusDistance(camera.matrixWorldInverse, lastCameraMat) > 1e-10) {
         render();
         lastCameraMat = camera.matrixWorldInverse.clone();
     }
