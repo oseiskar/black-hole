@@ -11,7 +11,8 @@ function Shader(mustacheTemplate) {
     // Compile-time shader parameters
     this.parameters = {
         accretion_disk: true,
-        planet: true
+        planet: true,
+        gravitational_time_dilation: true
     }
     var that = this;
     this.needsUpdate = false;
@@ -146,6 +147,8 @@ function setupGUI() {
     var gui = new dat.GUI();
     gui.add(shader.parameters, 'accretion_disk').onChange(updateShader);
     gui.add(shader.parameters, 'planet').onChange(updateShader);
+    
+    gui.add(shader.parameters, 'gravitational_time_dilation');
 }
 
 function starBackgroundTexture(x,y) {
@@ -247,6 +250,14 @@ var getFrameDuration = (function() {
 })();
 
 function render() {
-    uniforms.time.value += getFrameDuration();
+    
+    dt = getFrameDuration();
+    
+    if (shader.parameters.gravitational_time_dilation) {
+        var observer_r = camera.position.length();
+        dt = dt * 1.0 / Math.sqrt(1-1.0/observer_r);
+    }
+    
+    uniforms.time.value += dt;
     renderer.render( scene, camera );
 }
