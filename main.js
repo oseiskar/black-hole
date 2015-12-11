@@ -10,10 +10,15 @@ var TEX_RES = 2*1024;
 function Shader(mustacheTemplate) {
     // Compile-time shader parameters
     this.parameters = {
-        accretion_disk: true
+        accretion_disk: true,
+        planet: true
     }
     var that = this;
     this.needsUpdate = false;
+    
+    this.hasMovingParts = function() {
+        return this.parameters.planet;
+    }
     
     this.compile = function() {
         return Mustache.render(mustacheTemplate, that.parameters);
@@ -140,6 +145,7 @@ function setupGUI() {
     
     var gui = new dat.GUI();
     gui.add(shader.parameters, 'accretion_disk').onChange(updateShader);
+    gui.add(shader.parameters, 'planet').onChange(updateShader);
 }
 
 function starBackgroundTexture(x,y) {
@@ -218,7 +224,10 @@ function animate() {
     camera.updateMatrixWorld();
     camera.matrixWorldInverse.getInverse( camera.matrixWorld );
         
-    if (shader.needsUpdate || frobeniusDistance(camera.matrixWorldInverse, lastCameraMat) > 1e-10) {
+    if (shader.needsUpdate || shader.hasMovingParts() ||
+        frobeniusDistance(camera.matrixWorldInverse, lastCameraMat) > 1e-10) {
+        
+        shader.needsUpdate = false;
         render();
         lastCameraMat = camera.matrixWorldInverse.clone();
     }
@@ -227,7 +236,17 @@ function animate() {
 
 var lastCameraMat = new THREE.Matrix4().identity();
 
+var getFrameDuration = (function() {
+    var lastTimestamp = new Date().getTime();
+    return function() {
+        timestamp = new Date().getTime();
+        var diff = (timestamp - lastTimestamp) / 1000.0;
+        lastTimestamp = timestamp;
+        return diff;
+    };
+})();
+
 function render() {
-    uniforms.time.value += 0.05;
+    uniforms.time.value += getFrameDuration();
     renderer.render( scene, camera );
 }
