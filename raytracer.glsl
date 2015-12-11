@@ -76,27 +76,7 @@ void main() {
         pos = (cos(theta)*x + sin(theta)*y)/u;
         
         ray = pos-old_pos;
-        
-        {{#accretion_disk}}
-        if (old_pos.z * pos.z < 0.0) {
-            // crossed plane z=0
-            
-            vec3 isec = old_pos + ray*(-old_pos.z / ray.z);
-            
-            float r = length(isec);
-            
-            if (r > ACCRETION_MIN_R) {
-                color += texture2D(accretion_disk_texture,
-                    vec2(
-                        (r-ACCRETION_MIN_R)/ACCRETION_WIDTH,
-                        atan(isec.x, isec.y)/M_PI*0.5+0.5
-                    )) * ACCRETION_BRIGHTNESS;
-                
-                // opaque disk
-                //if (r < ACCRETION_MIN_R+ACCRETION_WIDTH) { u = 1.5; break; }
-            }
-        }
-        {{/accretion_disk}}
+        float solid_isec_t = 2.0;
         
         {{#planet}}
         if (old_pos.z * pos.z < 0.0 ||
@@ -116,13 +96,37 @@ void main() {
                     vec3 light_dir = planet_pos/PLANET_DISTANCE;
                     float diffuse = max(0.0, dot(normal, -light_dir));
                     color += PLANET_COLOR * ((1.0-PLANET_AMBIENT)*diffuse + PLANET_AMBIENT);
-                    u = 2.0;
-                    break;
+                    solid_isec_t = isec_t;
                 }
             }
         }
         {{/planet}}
         
+        {{#accretion_disk}}
+        if (old_pos.z * pos.z < 0.0) {
+            // crossed plane z=0
+            
+            float acc_isec_t = -old_pos.z / ray.z;
+            if (acc_isec_t < solid_isec_t) {
+                vec3 isec = old_pos + ray*acc_isec_t;
+                
+                float r = length(isec);
+                
+                if (r > ACCRETION_MIN_R) {
+                    color += texture2D(accretion_disk_texture,
+                        vec2(
+                            (r-ACCRETION_MIN_R)/ACCRETION_WIDTH,
+                            atan(isec.x, isec.y)/M_PI*0.5+0.5
+                        )) * ACCRETION_BRIGHTNESS;
+                    
+                    // opaque disk
+                    //if (r < ACCRETION_MIN_R+ACCRETION_WIDTH) { solid_isec_t = 0.5; }
+                }
+            }
+        }
+        {{/accretion_disk}}
+        
+        if (solid_isec_t <= 1.0) u = 2.0; // break
         if (u > 1.0) break;
     }
         
