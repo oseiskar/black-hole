@@ -1,5 +1,8 @@
 #define M_PI 3.141592653589793238462643383279
 #define R_SQRT_2 0.7071067811865475
+#define DEG_TO_RAD (M_PI/180.0)
+
+#define ROT_Y(a) mat3(0, cos(a), sin(a), 1, 0, 0, 0, sin(a), -cos(a))
 
 uniform vec2 resolution;
 uniform float time;
@@ -10,7 +13,8 @@ uniform vec3 cam_x;
 uniform vec3 cam_y;
 uniform vec3 cam_z;
 
-uniform sampler2D galaxy_texture, star_texture, accretion_disk_texture;
+uniform sampler2D galaxy_texture, star_texture,
+    accretion_disk_texture, planet_texture;
 
 const int NSTEPS = 100;
 const float MAX_REVOLUTIONS = 2.0;
@@ -21,18 +25,31 @@ const float ACCRETION_BRIGHTNESS = 2.0;
 const float STAR_BRIGHTNESS = 1.0;
 const float GALAXY_BRIGHTNESS = 0.5;
 
-const float PLANET_RADIUS = 0.3;
+const float PLANET_RADIUS = 0.4;
 const float PLANET_DISTANCE = 8.0;
 
-const vec4 PLANET_COLOR = vec4(0.3, 0.5, 0.8, 1.0);
+//const vec4 PLANET_COLOR = vec4(0.3, 0.5, 0.8, 1.0);
 const float PLANET_AMBIENT = 0.1;
 
 // background texture coordinate system
-const vec3 bg_x = vec3(0,R_SQRT_2,R_SQRT_2);
-const vec3 bg_y = vec3(1,0,0);
-const vec3 bg_z = vec3(0,R_SQRT_2,-R_SQRT_2);
+const mat3 BG_COORDS = ROT_Y(45.0 * DEG_TO_RAD);
+
+// planet texture coordinate system
+const float PLANET_AXIAL_TILT = 30.0 * DEG_TO_RAD;
+const mat3 PLANET_COORDS = ROT_Y(PLANET_AXIAL_TILT);
+
+const float PLANET_ORBITAL_ANG_VEL = 1.0 / sqrt(2.0*(PLANET_DISTANCE-1.0));
+const float MAX_PLANET_ROT = (1.0 - PLANET_ORBITAL_ANG_VEL*PLANET_DISTANCE) / PLANET_RADIUS;
+const float PLANET_ROTATION_ANG_VEL = -PLANET_ORBITAL_ANG_VEL + MAX_PLANET_ROT * 0.5;
+
+vec2 sphere_map(vec3 p) {
+    return vec2(atan(p.x,p.y)/M_PI*0.5+0.5, asin(p.z)/M_PI+0.5);
+}
 
 void main() {
+    
+    float planet_ang = time * PLANET_ORBITAL_ANG_VEL;
+    vec3 planet_pos = vec3(cos(planet_ang), sin(planet_ang), 0)*PLANET_DISTANCE;
     
     vec2 p = -1.0 + 2.0 * gl_FragCoord.xy / resolution.xy;
     p.y *= resolution.y / resolution.x;
@@ -51,12 +68,7 @@ void main() {
     float du = -dot(ray,x) / dot(ray,y) * u;
     float theta = 0.0;
     
-    const float PLANET_ANGULAR_VELOCITY = 1.0 / sqrt(2.0*(PLANET_DISTANCE-1.0));
-    
     vec3 old_pos;
-    
-    float planet_ang = time * PLANET_ANGULAR_VELOCITY;
-    vec3 planet_pos = vec3(cos(planet_ang), sin(planet_ang), 0)*PLANET_DISTANCE;
                 
     for (int j=0; j < NSTEPS; j++) {
         
@@ -92,10 +104,16 @@ void main() {
             if (discr > 0.0) {
                 float isec_t = (-dotp - sqrt(discr)) / ray2;
                 if (isec_t >= 0.0 && isec_t < 1.0) {
-                    vec3 normal = (old_pos + isec_t*ray - planet_pos) / PLANET_RADIUS;
+                    vec3 surface_point = (old_pos + isec_t*ray - planet_pos) / PLANET_RADIUS;
+                    vec2 tex_coord = sphere_map(surface_point * PLANET_COORDS);
+                    float rot_phase = time*PLANET_ROTATION_ANG_VEL*0.5/M_PI;
+                    tex_coord.x = mod(tex_coord.x + rot_phase, 1.0);
+                    
                     vec3 light_dir = planet_pos/PLANET_DISTANCE;
-                    float diffuse = max(0.0, dot(normal, -light_dir));
-                    color += PLANET_COLOR * ((1.0-PLANET_AMBIENT)*diffuse + PLANET_AMBIENT);
+                    float diffuse = max(0.0, dot(surface_point, -light_dir));
+                    float lightness = ((1.0-PLANET_AMBIENT)*diffuse + PLANET_AMBIENT);
+                    
+                    color += texture2D(planet_texture, tex_coord) * lightness;
                     solid_isec_t = isec_t;
                 }
             }
@@ -133,10 +151,7 @@ void main() {
     // the event horizon is at u = 1
     if (u < 1.0) { 
         ray = normalize(pos - old_pos);
-        vec2 tex_coord = vec2(
-            atan(dot(ray,bg_x),dot(ray,bg_y))/M_PI*0.5+0.5,
-            asin(dot(ray,bg_z))/M_PI+0.5
-        );
+        vec2 tex_coord = sphere_map(ray * BG_COORDS);
         
         color += texture2D(star_texture, tex_coord) * STAR_BRIGHTNESS;
         color += texture2D(galaxy_texture, tex_coord) * GALAXY_BRIGHTNESS;

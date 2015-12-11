@@ -2,7 +2,7 @@
 if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 
 var container, stats;
-var camera, scene, renderer, cameraControls, shader;
+var camera, scene, renderer, cameraControls, shader = null;
 var uniforms;
 
 var TEX_RES = 2*1024;
@@ -29,14 +29,47 @@ function Shader(mustacheTemplate) {
 
 function degToRad(a) { return Math.PI * a / 180.0; }
 
-SHADER_LOADER.load(function(shaders) {
-    new THREE.TextureLoader().load('img/milkyway.jpg', function(tex) {
-        shader = new Shader(shaders.raytracer.fragment);
-        init(shader, {galaxy: tex});
+(function(){
+    var textures = {
+        galaxy: null,
+        accretion_disk: null,
+        stars: null,
+        moon: null
+    };
+    
+    function whenLoaded() {
+        init(textures);
         $('#loader').hide();
         animate();
+    }
+    
+    function checkLoaded() {
+        if (shader === null) return;
+        for (key in textures) if (textures[key] === null) return;
+        whenLoaded();
+    }
+    
+    SHADER_LOADER.load(function(shaders) {
+        shader = new Shader(shaders.raytracer.fragment);
+        checkLoaded();
     });
-});
+    
+    var texLoader = new THREE.TextureLoader();
+    texLoader.load('img/milkyway.jpg', function(tex) {
+        textures.galaxy = tex;
+        checkLoaded();
+    });
+    
+    texLoader.load('img/moon_1024.jpg', function(tex) {
+        textures.moon = tex;
+        checkLoaded();
+    });
+    
+    textures.accretion_disk = renderDataTexture(TEX_RES, TEX_RES/4, accretionDiskTexture1D);
+    textures.stars = renderDataTexture(TEX_RES*2, TEX_RES, starBackgroundTexture);
+    
+    checkLoaded();
+})();
 
 function renderDataTexture(width, height, renderer) {
     // Generate random noise texture
@@ -59,12 +92,13 @@ function renderDataTexture(width, height, renderer) {
     
     var dt = new THREE.DataTexture( data, width, height, THREE.RGBFormat);
     dt.magFilter = THREE.LinearFilter;
+    dt.minFilter = THREE.LinearFilter;
     dt.needsUpdate = true;
     
     return dt;
 }
 
-function init(fragmentShader, textures) {
+function init(textures) {
 
     var FOV_ANGLE_DEG = 90;
 
@@ -83,20 +117,11 @@ function init(fragmentShader, textures) {
         cam_y: { type: "v3", value: new THREE.Vector3(0,1,0) },
         cam_z: { type: "v3", value: new THREE.Vector3(0,0,1) },
         fov_mult: { type: "f", value: 1.0 / Math.tan(degToRad(FOV_ANGLE_DEG*0.5)) },
-        star_texture: {
-            type: "t",
-            value: renderDataTexture(TEX_RES*2, TEX_RES, starBackgroundTexture)
-        },
         
-        accretion_disk_texture: {
-            type: "t",
-            value: renderDataTexture(TEX_RES, TEX_RES/4, accretionDiskTexture1D)
-        },
-        
-        galaxy_texture: {
-            type: "t",
-            value: textures.galaxy
-        }
+        star_texture: { type: "t", value: textures.stars },
+        accretion_disk_texture: { type: "t",  value: textures.accretion_disk },
+        galaxy_texture: { type: "t", value: textures.galaxy },
+        planet_texture: { type: "t", value: textures.moon },
     };
 
     var material = new THREE.ShaderMaterial( {
@@ -106,9 +131,9 @@ function init(fragmentShader, textures) {
     } );
     
     scene.updateShader = function() {
-        material.fragmentShader = fragmentShader.compile();
+        material.fragmentShader = shader.compile();
         material.needsUpdate = true;
-        fragmentShader.needsUpdate = true;
+        shader.needsUpdate = true;
     };
     
     scene.updateShader();
