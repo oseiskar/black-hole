@@ -51,7 +51,7 @@ void main() {
     float du = -dot(ray,x) / dot(ray,y) * u;
     float theta = 0.0;
     
-    const float PLANET_ANGULAR_VELOCITY = 1.0;
+    const float PLANET_ANGULAR_VELOCITY = 1.0 / sqrt(2.0*(PLANET_DISTANCE-1.0));
     
     vec3 old_pos;
     
