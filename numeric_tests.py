@@ -21,10 +21,16 @@ def trace_u(pos, ray, path):
     theta = 0
     t = 0
     
+    MAX_U_REL_CHANGE = 0.5
+    
     MAX_REVOLUTIONS = 2
-    step = 2.0*M_PI*MAX_REVOLUTIONS / float(n_steps)
+    theta_step = 2.0*M_PI*MAX_REVOLUTIONS / float(n_steps)
     
     for j in range(n_steps):
+        
+        step = theta_step
+        if du > 0 and abs(du) > abs(MAX_U_REL_CHANGE*u) / theta_step:
+            step = MAX_U_REL_CHANGE*u/du
         
         path[j,0:3] = pos
         path[j,3] = t
@@ -48,7 +54,7 @@ def trace_u(pos, ray, path):
         
         # Far away, dr/dtheta becomes large and dt inaccurate:
         # Then just use a classical formula (no Shapiro delay)
-        if u < 1.0/10.0: dt = length(pos-old_pos)
+        if du < 0 and u < 1.0/10.0: dt = length(pos-old_pos)
         t += dt
 
 
