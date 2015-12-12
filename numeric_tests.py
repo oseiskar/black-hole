@@ -1,17 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-# GLSL-like functions and constants
-length = lambda v: np.linalg.norm(v)
-normalize = lambda v: v * (1.0/length(v))
-cross = np.cross
-dot = np.dot
-acos = np.arccos
-sin = np.sin
-cos = np.cos
-sqrt = np.sqrt
-
-M_PI = np.pi
+from glsl_helpers import *
 
 def trace_u(pos, ray, path):
     """Main raytracer function"""
