@@ -17,8 +17,10 @@ uniform vec3 cam_z;
 uniform sampler2D galaxy_texture, star_texture,
     accretion_disk_texture, planet_texture;
 
+// stepping parameters
 const int NSTEPS = 100;
 const float MAX_REVOLUTIONS = 2.0;
+const float MAX_U_REL_CHANGE = 0.5;
 
 const float ACCRETION_MIN_R = 1.5;
 const float ACCRETION_WIDTH = 5.0;
@@ -51,10 +53,6 @@ vec4 planet_intersection(vec3 old_pos, vec3 ray, float t, float dt, vec3 planet_
     vec4 ret = vec4(0,0,0,0);
     
 {{#light_travel_time}}
-    // work-around for urealisic planet paths that shortcut in the orbital
-    // circle too much (artefact of the linear interpolation of planet motion)
-    if (dt > 5.0) return ret;
-
     float planet_ang1 = (t-dt) * PLANET_ORBITAL_ANG_VEL;
     vec3 planet_pos1 = vec3(cos(planet_ang1), sin(planet_ang1), 0)*PLANET_DISTANCE;
     vec3 planet_vel = (planet_pos1-planet_pos0)/dt;
@@ -137,6 +135,7 @@ void main() {
 {{^light_travel_time}}
     float planet_ang0 = t * PLANET_ORBITAL_ANG_VEL;
     vec3 planet_pos0 = vec3(cos(planet_ang0), sin(planet_ang0), 0)*PLANET_DISTANCE;
+    
 {{/light_travel_time}}
     
     vec3 old_pos;
@@ -144,6 +143,11 @@ void main() {
     for (int j=0; j < NSTEPS; j++) {
         
         step = MAX_REVOLUTIONS * 2.0*M_PI / float(NSTEPS);
+{{#light_travel_time}}
+        if (du > 0.0 && abs(du) > abs(MAX_U_REL_CHANGE*u) / step)
+            step = MAX_U_REL_CHANGE*u/du;
+{{/light_travel_time}}
+        
         old_u = u;
     
         float ddu = -u*(1.0 - 1.5*u*u);
