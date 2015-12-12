@@ -46,10 +46,70 @@ vec2 sphere_map(vec3 p) {
     return vec2(atan(p.x,p.y)/M_PI*0.5+0.5, asin(p.z)/M_PI+0.5);
 }
 
-void main() {
+vec4 planet_intersection(vec3 old_pos, vec3 ray, float t, float dt, vec3 planet_pos0) {
+    vec4 ret = vec4(0,0,0,0);
     
-    float planet_ang = time * PLANET_ORBITAL_ANG_VEL;
-    vec3 planet_pos = vec3(cos(planet_ang), sin(planet_ang), 0)*PLANET_DISTANCE;
+{{#light_travel_time}}
+    float planet_ang1 = (t-dt) * PLANET_ORBITAL_ANG_VEL;
+    vec3 planet_pos1 = vec3(cos(planet_ang1), sin(planet_ang1), 0)*PLANET_DISTANCE;
+    
+    vec3 planet_vel = (planet_pos1-planet_pos0)/dt;
+    
+    vec3 rel_ray = ray/dt - planet_vel;
+    
+    // ray-sphere intersection
+    vec3 d = old_pos - planet_pos0;
+    float dotp = dot(d,rel_ray);
+    float c_coeff = dot(d,d) - PLANET_RADIUS*PLANET_RADIUS;
+    float ray2 = dot(rel_ray, rel_ray);
+    float discr = dotp*dotp - ray2*c_coeff;
+    
+    if (discr < 0.0) return ret;
+    
+    float isec_t = (-dotp - sqrt(discr)) / ray2;
+    
+    if (isec_t < 0.0 || isec_t > dt) return ret;
+    
+    vec3 surface_point = (old_pos + isec_t*rel_ray - planet_pos0) / PLANET_RADIUS;
+    vec3 light_dir = (planet_pos0 + planet_vel*isec_t)/PLANET_DISTANCE;
+    float rot_phase = (t-isec_t)*PLANET_ROTATION_ANG_VEL*0.5/M_PI;
+    
+    isec_t = isec_t/dt;
+    
+{{/light_travel_time}}
+    
+{{^light_travel_time}}    
+    // ray-sphere intersection
+    vec3 d = old_pos - planet_pos0;
+    float dotp = dot(d,ray);
+    float c_coeff = dot(d,d) - PLANET_RADIUS*PLANET_RADIUS;
+    float ray2 = dot(ray, ray);
+    float discr = dotp*dotp - ray2*c_coeff;
+    
+    if (discr < 0.0) return ret;
+    float isec_t = (-dotp - sqrt(discr)) / ray2;
+    
+    if (isec_t < 0.0 || isec_t > 1.0) return ret;
+    
+    vec3 surface_point = (old_pos + isec_t*ray - planet_pos0) / PLANET_RADIUS;
+    float rot_phase = time*PLANET_ROTATION_ANG_VEL*0.5/M_PI;
+    vec3 light_dir = planet_pos0/PLANET_DISTANCE;
+    
+{{/light_travel_time}}
+    
+    vec2 tex_coord = sphere_map(surface_point * PLANET_COORDS);
+    tex_coord.x = mod(tex_coord.x + rot_phase, 1.0);
+    
+    float diffuse = max(0.0, dot(surface_point, -light_dir));
+    float lightness = ((1.0-PLANET_AMBIENT)*diffuse + PLANET_AMBIENT);
+    
+    ret = texture2D(planet_texture, tex_coord) * lightness;
+    ret.w = isec_t;
+    
+    return ret;
+}
+
+void main() {
     
     vec2 p = -1.0 + 2.0 * gl_FragCoord.xy / resolution.xy;
     p.y *= resolution.y / resolution.x;
@@ -67,6 +127,12 @@ void main() {
     vec3 y = cross(n,x);
     float du = -dot(ray,x) / dot(ray,y) * u;
     float theta = 0.0;
+    float t = time;
+{{^light_travel_time}}
+    const float dt = 0.0;
+    float planet_ang0 = t * PLANET_ORBITAL_ANG_VEL;
+    vec3 planet_pos0 = vec3(cos(planet_ang0), sin(planet_ang0), 0)*PLANET_DISTANCE;
+{{/light_travel_time}}
     
     vec3 old_pos;
                 
@@ -76,6 +142,11 @@ void main() {
         old_u = u;
     
         float ddu = -u*(1.0 - 1.5*u*u);
+        
+{{#light_travel_time}}
+        float dt = sqrt(du*du + u*u*(1.0-u))/(u*u*(1.0-u))*step;
+{{/light_travel_time}}
+        
         u += du*step;
         
         if (u < 0.0) break;
@@ -90,37 +161,30 @@ void main() {
         ray = pos-old_pos;
         float solid_isec_t = 2.0;
         
-        {{#planet}}
-        if (old_pos.z * pos.z < 0.0 ||
-            min(abs(old_pos.z), abs(pos.z)) < PLANET_RADIUS) {
+{{#light_travel_time}}
+        if (min(u,old_u) < 1.0/30.0) dt = length(ray);
+{{/light_travel_time}}
+        
+{{#planet}}
+        if (max(u, old_u) > 1.0/(PLANET_RADIUS+PLANET_DISTANCE) && (
+            old_pos.z * pos.z < 0.0 ||
+            min(abs(old_pos.z), abs(pos.z)) < PLANET_RADIUS)) {
+                
+{{#light_travel_time}}
+            float planet_ang0 = t * PLANET_ORBITAL_ANG_VEL;
+            vec3 planet_pos0 = vec3(cos(planet_ang0), sin(planet_ang0), 0)*PLANET_DISTANCE;
+{{/light_travel_time}}
             
-            // ray-sphere intersection
-            vec3 d = old_pos - planet_pos;
-            float dotp = dot(d,ray);
-            float c_coeff = dot(d,d) - PLANET_RADIUS*PLANET_RADIUS;
-            float ray2 = dot(ray, ray);
-            float discr = dotp*dotp - ray2*c_coeff;
-            
-            if (discr > 0.0) {
-                float isec_t = (-dotp - sqrt(discr)) / ray2;
-                if (isec_t >= 0.0 && isec_t < 1.0) {
-                    vec3 surface_point = (old_pos + isec_t*ray - planet_pos) / PLANET_RADIUS;
-                    vec2 tex_coord = sphere_map(surface_point * PLANET_COORDS);
-                    float rot_phase = time*PLANET_ROTATION_ANG_VEL*0.5/M_PI;
-                    tex_coord.x = mod(tex_coord.x + rot_phase, 1.0);
-                    
-                    vec3 light_dir = planet_pos/PLANET_DISTANCE;
-                    float diffuse = max(0.0, dot(surface_point, -light_dir));
-                    float lightness = ((1.0-PLANET_AMBIENT)*diffuse + PLANET_AMBIENT);
-                    
-                    color += texture2D(planet_texture, tex_coord) * lightness;
-                    solid_isec_t = isec_t;
-                }
+            vec4 planet_isec = planet_intersection(old_pos, ray, t, dt, planet_pos0);
+            if (planet_isec.w > 0.0) {
+                solid_isec_t = planet_isec.w;
+                planet_isec.w = 1.0;
+                color += planet_isec;
             }
         }
-        {{/planet}}
+{{/planet}}
         
-        {{#accretion_disk}}
+{{#accretion_disk}}
         if (old_pos.z * pos.z < 0.0) {
             // crossed plane z=0
             
@@ -131,18 +195,27 @@ void main() {
                 float r = length(isec);
                 
                 if (r > ACCRETION_MIN_R) {
-                    color += texture2D(accretion_disk_texture,
-                        vec2(
+                    vec2 tex_coord = vec2(
                             (r-ACCRETION_MIN_R)/ACCRETION_WIDTH,
                             atan(isec.x, isec.y)/M_PI*0.5+0.5
-                        )) * ACCRETION_BRIGHTNESS;
+                    );
+                    
+                    // accretion disk time evolution
+                    //float rot_phase = 1.0 / sqrt(2.0*(r-1.0)) * time * 0.5 / M_PI;
+                    //tex_coord.y = mod(tex_coord.x + rot_phase, 1.0);
+                    
+                    color += texture2D(accretion_disk_texture,tex_coord) * ACCRETION_BRIGHTNESS;
                     
                     // opaque disk
                     //if (r < ACCRETION_MIN_R+ACCRETION_WIDTH) { solid_isec_t = 0.5; }
                 }
             }
         }
-        {{/accretion_disk}}
+{{/accretion_disk}}
+        
+{{#light_travel_time}}
+        t -= dt;
+{{/light_travel_time}}
         
         if (solid_isec_t <= 1.0) u = 2.0; // break
         if (u > 1.0) break;

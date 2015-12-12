@@ -13,6 +13,7 @@ function Shader(mustacheTemplate) {
         accretion_disk: true,
         planet: true,
         gravitational_time_dilation: true,
+        light_travel_time: true,
         time_scale: 1.0
     }
     var that = this;
@@ -173,6 +174,7 @@ function setupGUI() {
     var gui = new dat.GUI();
     gui.add(shader.parameters, 'accretion_disk').onChange(updateShader);
     gui.add(shader.parameters, 'planet').onChange(updateShader);
+    gui.add(shader.parameters, 'light_travel_time').onChange(updateShader);
     
     gui.add(shader.parameters, 'gravitational_time_dilation');
     gui.add(shader.parameters, 'time_scale').min(0);
