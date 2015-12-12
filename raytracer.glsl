@@ -1,6 +1,7 @@
 #define M_PI 3.141592653589793238462643383279
 #define R_SQRT_2 0.7071067811865475
 #define DEG_TO_RAD (M_PI/180.0)
+#define SQ(x) ((x)*(x))
 
 #define ROT_Y(a) mat3(0, cos(a), sin(a), 1, 0, 0, 0, sin(a), -cos(a))
 
@@ -50,17 +51,21 @@ vec4 planet_intersection(vec3 old_pos, vec3 ray, float t, float dt, vec3 planet_
     vec4 ret = vec4(0,0,0,0);
     
 {{#light_travel_time}}
+    // work-around for urealisic planet paths that shortcut in the orbital
+    // circle too much (artefact of the linear interpolation of planet motion)
+    if (dt > 5.0) return ret;
+
     float planet_ang1 = (t-dt) * PLANET_ORBITAL_ANG_VEL;
     vec3 planet_pos1 = vec3(cos(planet_ang1), sin(planet_ang1), 0)*PLANET_DISTANCE;
-    
     vec3 planet_vel = (planet_pos1-planet_pos0)/dt;
     
+    // transform to moving planet coordinate system
     vec3 rel_ray = ray/dt - planet_vel;
     
     // ray-sphere intersection
     vec3 d = old_pos - planet_pos0;
     float dotp = dot(d,rel_ray);
-    float c_coeff = dot(d,d) - PLANET_RADIUS*PLANET_RADIUS;
+    float c_coeff = dot(d,d) - SQ(PLANET_RADIUS);
     float ray2 = dot(rel_ray, rel_ray);
     float discr = dotp*dotp - ray2*c_coeff;
     
@@ -82,7 +87,7 @@ vec4 planet_intersection(vec3 old_pos, vec3 ray, float t, float dt, vec3 planet_
     // ray-sphere intersection
     vec3 d = old_pos - planet_pos0;
     float dotp = dot(d,ray);
-    float c_coeff = dot(d,d) - PLANET_RADIUS*PLANET_RADIUS;
+    float c_coeff = dot(d,d) - SQ(PLANET_RADIUS);
     float ray2 = dot(ray, ray);
     float discr = dotp*dotp - ray2*c_coeff;
     
@@ -128,8 +133,8 @@ void main() {
     float du = -dot(ray,x) / dot(ray,y) * u;
     float theta = 0.0;
     float t = time;
+    float dt = 0.0;
 {{^light_travel_time}}
-    const float dt = 0.0;
     float planet_ang0 = t * PLANET_ORBITAL_ANG_VEL;
     vec3 planet_pos0 = vec3(cos(planet_ang0), sin(planet_ang0), 0)*PLANET_DISTANCE;
 {{/light_travel_time}}
@@ -144,7 +149,9 @@ void main() {
         float ddu = -u*(1.0 - 1.5*u*u);
         
 {{#light_travel_time}}
-        float dt = sqrt(du*du + u*u*(1.0-u))/(u*u*(1.0-u))*step;
+{{#gravitational_time_dilation}}
+        dt = sqrt(du*du + u*u*(1.0-u))/(u*u*(1.0-u))*step;
+{{/gravitational_time_dilation}}
 {{/light_travel_time}}
         
         u += du*step;
@@ -162,13 +169,21 @@ void main() {
         float solid_isec_t = 2.0;
         
 {{#light_travel_time}}
-        if (min(u,old_u) < 1.0/30.0) dt = length(ray);
+{{#gravitational_time_dilation}}
+        if (min(u,old_u) < 1.0/30.0)
+{{/gravitational_time_dilation}}
+            dt = length(ray);
 {{/light_travel_time}}
         
 {{#planet}}
-        if (max(u, old_u) > 1.0/(PLANET_RADIUS+PLANET_DISTANCE) && (
-            old_pos.z * pos.z < 0.0 ||
-            min(abs(old_pos.z), abs(pos.z)) < PLANET_RADIUS)) {
+        if (
+            (
+                old_pos.z * pos.z < 0.0 ||
+                min(abs(old_pos.z), abs(pos.z)) < PLANET_RADIUS
+            ) &&
+            1.0/max(u, old_u) < (PLANET_RADIUS+PLANET_DISTANCE) && 
+            1.0/min(u, old_u) > (PLANET_RADIUS-PLANET_DISTANCE)
+        ) {
                 
 {{#light_travel_time}}
             float planet_ang0 = t * PLANET_ORBITAL_ANG_VEL;

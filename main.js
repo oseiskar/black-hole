@@ -176,7 +176,7 @@ function setupGUI() {
     gui.add(shader.parameters, 'planet').onChange(updateShader);
     gui.add(shader.parameters, 'light_travel_time').onChange(updateShader);
     
-    gui.add(shader.parameters, 'gravitational_time_dilation');
+    gui.add(shader.parameters, 'gravitational_time_dilation').onChange(updateShader);
     gui.add(shader.parameters, 'time_scale').min(0);
 }
 
