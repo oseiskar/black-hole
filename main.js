@@ -13,6 +13,7 @@ function Shader(mustacheTemplate) {
         accretion_disk: true,
         planet: true,
         gravitational_time_dilation: true,
+        shapiro_delay: true,
         light_travel_time: true,
         time_scale: 1.0
     }
@@ -176,7 +177,8 @@ function setupGUI() {
     gui.add(shader.parameters, 'planet').onChange(updateShader);
     gui.add(shader.parameters, 'light_travel_time').onChange(updateShader);
     
-    gui.add(shader.parameters, 'gravitational_time_dilation').onChange(updateShader);
+    gui.add(shader.parameters, 'gravitational_time_dilation');
+    //gui.add(shader.parameters, 'shapiro_delay').onChange(updateShader);
     gui.add(shader.parameters, 'time_scale').min(0);
 }
 

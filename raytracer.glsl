@@ -153,9 +153,9 @@ void main() {
         float ddu = -u*(1.0 - 1.5*u*u);
         
 {{#light_travel_time}}
-{{#gravitational_time_dilation}}
+{{#shapiro_delay}}
         dt = sqrt(du*du + u*u*(1.0-u))/(u*u*(1.0-u))*step;
-{{/gravitational_time_dilation}}
+{{/shapiro_delay}}
 {{/light_travel_time}}
         
         u += du*step;
@@ -173,9 +173,9 @@ void main() {
         float solid_isec_t = 2.0;
         
 {{#light_travel_time}}
-{{#gravitational_time_dilation}}
+{{#shapiro_delay}}
         if (min(u,old_u) < 1.0/30.0)
-{{/gravitational_time_dilation}}
+{{/shapiro_delay}}
             dt = length(ray);
 {{/light_travel_time}}
         
