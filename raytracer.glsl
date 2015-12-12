@@ -14,6 +14,8 @@ uniform vec3 cam_x;
 uniform vec3 cam_y;
 uniform vec3 cam_z;
 
+uniform float planet_distance, planet_radius;
+
 uniform sampler2D galaxy_texture, star_texture,
     accretion_disk_texture, planet_texture;
 
@@ -28,9 +30,6 @@ const float ACCRETION_BRIGHTNESS = 2.0;
 const float STAR_BRIGHTNESS = 1.0;
 const float GALAXY_BRIGHTNESS = 0.5;
 
-const float PLANET_RADIUS = 0.4;
-const float PLANET_DISTANCE = 8.0;
-
 //const vec4 PLANET_COLOR = vec4(0.3, 0.5, 0.8, 1.0);
 const float PLANET_AMBIENT = 0.1;
 
@@ -41,15 +40,19 @@ const mat3 BG_COORDS = ROT_Y(45.0 * DEG_TO_RAD);
 const float PLANET_AXIAL_TILT = 30.0 * DEG_TO_RAD;
 const mat3 PLANET_COORDS = ROT_Y(PLANET_AXIAL_TILT);
 
-const float PLANET_ORBITAL_ANG_VEL = 1.0 / sqrt(2.0*(PLANET_DISTANCE-1.0)) / PLANET_DISTANCE;
-const float MAX_PLANET_ROT = (1.0 - PLANET_ORBITAL_ANG_VEL*PLANET_DISTANCE) / PLANET_RADIUS;
-const float PLANET_ROTATION_ANG_VEL = -PLANET_ORBITAL_ANG_VEL + MAX_PLANET_ROT * 0.5;
+// derived "constants" (from uniforms)
+float PLANET_RADIUS,
+    PLANET_DISTANCE,
+    PLANET_ORBITAL_ANG_VEL,
+    PLANET_ROTATION_ANG_VEL;
 
 vec2 sphere_map(vec3 p) {
     return vec2(atan(p.x,p.y)/M_PI*0.5+0.5, asin(p.z)/M_PI+0.5);
 }
 
 vec4 planet_intersection(vec3 old_pos, vec3 ray, float t, float dt, vec3 planet_pos0) {
+    
+    
     vec4 ret = vec4(0,0,0,0);
     
 {{#light_travel_time}}
@@ -95,7 +98,7 @@ vec4 planet_intersection(vec3 old_pos, vec3 ray, float t, float dt, vec3 planet_
     if (isec_t < 0.0 || isec_t > 1.0) return ret;
     
     vec3 surface_point = (old_pos + isec_t*ray - planet_pos0) / PLANET_RADIUS;
-    float rot_phase = time*PLANET_ROTATION_ANG_VEL*0.5/M_PI;
+    float rot_phase = t*PLANET_ROTATION_ANG_VEL*0.5/M_PI;
     vec3 light_dir = planet_pos0/PLANET_DISTANCE;
     
 {{/light_travel_time}}
@@ -113,6 +116,15 @@ vec4 planet_intersection(vec3 old_pos, vec3 ray, float t, float dt, vec3 planet_
 }
 
 void main() {
+    
+    {{#planet}}
+    // "constants" derived from uniforms
+    PLANET_RADIUS = planet_radius;
+    PLANET_DISTANCE = max(planet_distance,planet_radius+1.5);
+    PLANET_ORBITAL_ANG_VEL = 1.0 / sqrt(2.0*(PLANET_DISTANCE-1.0)) / PLANET_DISTANCE;
+    float MAX_PLANET_ROT = max((1.0 - PLANET_ORBITAL_ANG_VEL*PLANET_DISTANCE) / PLANET_RADIUS,0.0);
+    PLANET_ROTATION_ANG_VEL = -PLANET_ORBITAL_ANG_VEL - MAX_PLANET_ROT * 0.5;
+    {{/planet}}
     
     vec2 p = -1.0 + 2.0 * gl_FragCoord.xy / resolution.xy;
     p.y *= resolution.y / resolution.x;

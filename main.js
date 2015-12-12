@@ -12,10 +12,12 @@ function Shader(mustacheTemplate) {
     this.parameters = {
         accretion_disk: true,
         planet: true,
+        planet_distance: 8.0,
+        planet_radius: 0.4,
         gravitational_time_dilation: true,
-        shapiro_delay: true,
+        shapiro_delay: false,
         light_travel_time: true,
-        time_scale: 1.0
+        time_scale: 1.0,
     }
     var that = this;
     this.needsUpdate = false;
@@ -120,11 +122,16 @@ function init(textures) {
         cam_z: { type: "v3", value: new THREE.Vector3(0,0,1) },
         fov_mult: { type: "f", value: 1.0 / Math.tan(degToRad(FOV_ANGLE_DEG*0.5)) },
         
+        planet_distance: { type: "f" },
+        planet_radius: { type: "f" },
+        
         star_texture: { type: "t", value: textures.stars },
         accretion_disk_texture: { type: "t",  value: textures.accretion_disk },
         galaxy_texture: { type: "t", value: textures.galaxy },
         planet_texture: { type: "t", value: textures.moon },
     };
+    
+    updateUniforms();
 
     var material = new THREE.ShaderMaterial( {
 
@@ -168,17 +175,26 @@ function init(textures) {
     setupGUI();
 }
 
+function updateUniforms() {
+    uniforms.planet_distance.value = shader.parameters.planet_distance;
+    uniforms.planet_radius.value = shader.parameters.planet_radius;
+}
+
 function setupGUI() {
     
     function updateShader() { scene.updateShader(); }
     
     var gui = new dat.GUI();
     gui.add(shader.parameters, 'accretion_disk').onChange(updateShader);
-    gui.add(shader.parameters, 'planet').onChange(updateShader);
-    gui.add(shader.parameters, 'light_travel_time').onChange(updateShader);
     
-    gui.add(shader.parameters, 'gravitational_time_dilation');
+    
+    gui.add(shader.parameters, 'planet').onChange(updateShader);
+    gui.add(shader.parameters, 'planet_distance').min(1.5).onChange(updateUniforms);
+    gui.add(shader.parameters, 'planet_radius').min(0.01).max(2.0).onChange(updateUniforms);
+    
     //gui.add(shader.parameters, 'shapiro_delay').onChange(updateShader);
+    gui.add(shader.parameters, 'gravitational_time_dilation');
+    gui.add(shader.parameters, 'light_travel_time').onChange(updateShader);
     gui.add(shader.parameters, 'time_scale').min(0);
 }
 
