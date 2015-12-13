@@ -21,16 +21,16 @@ def trace_u(pos, ray, path):
     theta = 0
     t = 0
     
-    MAX_U_REL_CHANGE = 0.5
-    
     MAX_REVOLUTIONS = 2
     theta_step = 2.0*M_PI*MAX_REVOLUTIONS / float(n_steps)
     
     for j in range(n_steps):
         
+        max_rel_u_change = (1-np.log(u))*0.1
+        
         step = theta_step
-        if du > 0 and abs(du) > abs(MAX_U_REL_CHANGE*u) / theta_step:
-            step = MAX_U_REL_CHANGE*u/du
+        if du > 0 and abs(du) > abs(max_rel_u_change*u) / theta_step:
+            step = max_rel_u_change*u/du
         
         path[j,0:3] = pos
         path[j,3] = t
