@@ -20,7 +20,7 @@ uniform sampler2D galaxy_texture, star_texture,
     accretion_disk_texture, planet_texture;
 
 // stepping parameters
-const int NSTEPS = 100;
+const int NSTEPS = 200;
 const float MAX_REVOLUTIONS = 2.0;
 
 const float ACCRETION_MIN_R = 1.5;
@@ -47,6 +47,11 @@ float PLANET_RADIUS,
 
 vec2 sphere_map(vec3 p) {
     return vec2(atan(p.x,p.y)/M_PI*0.5+0.5, asin(p.z)/M_PI+0.5);
+}
+
+float smooth_step(float x, float threshold) {
+    const float STEEPNESS = 1.0;
+    return 1.0 / (1.0 + exp(-(x-threshold)*STEEPNESS));
 }
 
 vec4 planet_intersection(vec3 old_pos, vec3 ray, float t, float dt, vec3 planet_pos0) {
@@ -194,9 +199,12 @@ void main() {
         
         {{#light_travel_time}}
         {{#shapiro_delay}}
-        if (du < 0.0 && u < 1.0/5.0)
+        float mix = smooth_step(1.0/u, 8.0);
+        dt = mix*length(ray) + (1.0-mix)*dt;
         {{/shapiro_delay}}
-            dt = length(ray);
+        {{^shapiro_delay}}
+        dt = length(ray);
+        {{/shapiro_delay}}
         {{/light_travel_time}}
         
         {{#planet}}
