@@ -22,7 +22,6 @@ uniform sampler2D galaxy_texture, star_texture,
 // stepping parameters
 const int NSTEPS = 100;
 const float MAX_REVOLUTIONS = 2.0;
-const float MAX_U_REL_CHANGE = 0.5;
 
 const float ACCRETION_MIN_R = 1.5;
 const float ACCRETION_WIDTH = 5.0;
@@ -52,10 +51,9 @@ vec2 sphere_map(vec3 p) {
 
 vec4 planet_intersection(vec3 old_pos, vec3 ray, float t, float dt, vec3 planet_pos0) {
     
-    
     vec4 ret = vec4(0,0,0,0);
     
-{{#light_travel_time}}
+    {{#light_travel_time}}
     float planet_ang1 = (t-dt) * PLANET_ORBITAL_ANG_VEL;
     vec3 planet_pos1 = vec3(cos(planet_ang1), sin(planet_ang1), 0)*PLANET_DISTANCE;
     vec3 planet_vel = (planet_pos1-planet_pos0)/dt;
@@ -82,9 +80,9 @@ vec4 planet_intersection(vec3 old_pos, vec3 ray, float t, float dt, vec3 planet_
     
     isec_t = isec_t/dt;
     
-{{/light_travel_time}}
+    {{/light_travel_time}}
+    {{^light_travel_time}}    
     
-{{^light_travel_time}}    
     // ray-sphere intersection
     vec3 d = old_pos - planet_pos0;
     float dotp = dot(d,ray);
@@ -101,7 +99,7 @@ vec4 planet_intersection(vec3 old_pos, vec3 ray, float t, float dt, vec3 planet_
     float rot_phase = t*PLANET_ROTATION_ANG_VEL*0.5/M_PI;
     vec3 light_dir = planet_pos0/PLANET_DISTANCE;
     
-{{/light_travel_time}}
+    {{/light_travel_time}}
     
     vec2 tex_coord = sphere_map(surface_point * PLANET_COORDS);
     tex_coord.x = mod(tex_coord.x + rot_phase, 1.0);
@@ -144,31 +142,41 @@ void main() {
     float theta = 0.0;
     float t = time;
     float dt = 0.0;
-{{^light_travel_time}}
+    
+    {{^light_travel_time}}
     float planet_ang0 = t * PLANET_ORBITAL_ANG_VEL;
     vec3 planet_pos0 = vec3(cos(planet_ang0), sin(planet_ang0), 0)*PLANET_DISTANCE;
-    
-{{/light_travel_time}}
+    {{/light_travel_time}}
     
     vec3 old_pos;
                 
     for (int j=0; j < NSTEPS; j++) {
         
         step = MAX_REVOLUTIONS * 2.0*M_PI / float(NSTEPS);
-{{#light_travel_time}}
-        if (du > 0.0 && abs(du) > abs(MAX_U_REL_CHANGE*u) / step)
-            step = MAX_U_REL_CHANGE*u/du;
-{{/light_travel_time}}
+        
+        // adaptive step size
+        {{#light_travel_time}}
+        float max_rel_u_change = 0.5;
+        
+        if (du > 0.0) {
+            {{#shapiro_delay}}
+            max_rel_u_change = (1.0-log(u))*10.0 / float(NSTEPS);
+            {{/shapiro_delay}}
+            
+            if (abs(du) > abs(max_rel_u_change*u) / step)
+                step = max_rel_u_change*u/du;
+        }
+        {{/light_travel_time}}
         
         old_u = u;
     
         float ddu = -u*(1.0 - 1.5*u*u);
         
-{{#light_travel_time}}
-{{#shapiro_delay}}
+        {{#light_travel_time}}
+        {{#shapiro_delay}}
         dt = sqrt(du*du + u*u*(1.0-u))/(u*u*(1.0-u))*step;
-{{/shapiro_delay}}
-{{/light_travel_time}}
+        {{/shapiro_delay}}
+        {{/light_travel_time}}
         
         u += du*step;
         
@@ -184,27 +192,27 @@ void main() {
         ray = pos-old_pos;
         float solid_isec_t = 2.0;
         
-{{#light_travel_time}}
-{{#shapiro_delay}}
-        if (min(u,old_u) < 1.0/30.0)
-{{/shapiro_delay}}
+        {{#light_travel_time}}
+        {{#shapiro_delay}}
+        if (du < 0.0 && u < 1.0/5.0)
+        {{/shapiro_delay}}
             dt = length(ray);
-{{/light_travel_time}}
+        {{/light_travel_time}}
         
-{{#planet}}
+        {{#planet}}
         if (
             (
                 old_pos.z * pos.z < 0.0 ||
                 min(abs(old_pos.z), abs(pos.z)) < PLANET_RADIUS
             ) &&
-            1.0/max(u, old_u) < (PLANET_RADIUS+PLANET_DISTANCE) && 
-            1.0/min(u, old_u) > (PLANET_RADIUS-PLANET_DISTANCE)
+            max(u, old_u) > 1.0/(PLANET_DISTANCE+PLANET_RADIUS) && 
+            min(u, old_u) < 1.0/(PLANET_DISTANCE-PLANET_RADIUS)
         ) {
                 
-{{#light_travel_time}}
+            {{#light_travel_time}}
             float planet_ang0 = t * PLANET_ORBITAL_ANG_VEL;
             vec3 planet_pos0 = vec3(cos(planet_ang0), sin(planet_ang0), 0)*PLANET_DISTANCE;
-{{/light_travel_time}}
+            {{/light_travel_time}}
             
             vec4 planet_isec = planet_intersection(old_pos, ray, t, dt, planet_pos0);
             if (planet_isec.w > 0.0) {
@@ -213,9 +221,9 @@ void main() {
                 color += planet_isec;
             }
         }
-{{/planet}}
+        {{/planet}}
         
-{{#accretion_disk}}
+        {{#accretion_disk}}
         if (old_pos.z * pos.z < 0.0) {
             // crossed plane z=0
             
@@ -242,11 +250,11 @@ void main() {
                 }
             }
         }
-{{/accretion_disk}}
+        {{/accretion_disk}}
         
-{{#light_travel_time}}
+        {{#light_travel_time}}
         t -= dt;
-{{/light_travel_time}}
+        {{/light_travel_time}}
         
         if (solid_isec_t <= 1.0) u = 2.0; // break
         if (u > 1.0) break;

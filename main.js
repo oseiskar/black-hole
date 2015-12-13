@@ -15,7 +15,7 @@ function Shader(mustacheTemplate) {
         planet_distance: 8.0,
         planet_radius: 0.4,
         gravitational_time_dilation: true,
-        shapiro_delay: false,
+        shapiro_delay: true,
         light_travel_time: true,
         time_scale: 1.0,
     }
@@ -192,7 +192,7 @@ function setupGUI() {
     gui.add(shader.parameters, 'planet_distance').min(1.5).onChange(updateUniforms);
     gui.add(shader.parameters, 'planet_radius').min(0.01).max(2.0).onChange(updateUniforms);
     
-    //gui.add(shader.parameters, 'shapiro_delay').onChange(updateShader);
+    gui.add(shader.parameters, 'shapiro_delay').onChange(updateShader);
     gui.add(shader.parameters, 'gravitational_time_dilation');
     gui.add(shader.parameters, 'light_travel_time').onChange(updateShader);
     gui.add(shader.parameters, 'time_scale').min(0);
