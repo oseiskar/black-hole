@@ -164,9 +164,9 @@ void main() {
         float max_rel_u_change = 0.5;
         
         if (du > 0.0) {
-            {{#shapiro_delay}}
+            {{#gravitational_time_dilation}}
             max_rel_u_change = (1.0-log(u))*10.0 / float(NSTEPS);
-            {{/shapiro_delay}}
+            {{/gravitational_time_dilation}}
             
             if (abs(du) > abs(max_rel_u_change*u) / step)
                 step = max_rel_u_change*u/du;
@@ -178,9 +178,9 @@ void main() {
         float ddu = -u*(1.0 - 1.5*u*u);
         
         {{#light_travel_time}}
-        {{#shapiro_delay}}
+        {{#gravitational_time_dilation}}
         dt = sqrt(du*du + u*u*(1.0-u))/(u*u*(1.0-u))*step;
-        {{/shapiro_delay}}
+        {{/gravitational_time_dilation}}
         {{/light_travel_time}}
         
         u += du*step;
@@ -198,13 +198,13 @@ void main() {
         float solid_isec_t = 2.0;
         
         {{#light_travel_time}}
-        {{#shapiro_delay}}
+        {{#gravitational_time_dilation}}
         float mix = smooth_step(1.0/u, 8.0);
         dt = mix*length(ray) + (1.0-mix)*dt;
-        {{/shapiro_delay}}
-        {{^shapiro_delay}}
+        {{/gravitational_time_dilation}}
+        {{^gravitational_time_dilation}}
         dt = length(ray);
-        {{/shapiro_delay}}
+        {{/gravitational_time_dilation}}
         {{/light_travel_time}}
         
         {{#planet}}
