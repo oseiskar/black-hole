@@ -1,14 +1,7 @@
-### Ray-traced simulation of a black hole
+### Ray-traced simulation of a black hole using
 
-* The gravitational lensing effect should look "real": light paths are obtained by integrating an ODE describing the Schwarzschild geodesics (using GLSL on the GPU)
-* Accretion disk colors are fake (surprised?)
-* Uses [three.js](http://threejs.org)
+_see **[COPYRIGHT.md](https://github.com/oseiskar/black-hole/blob/master/COPYRIGHT.md)** for license and copyright info_
 
-**Some source material**
+In this simulation, the light ray paths are computed by integrating an ODE describing the [Schwarzschild geodesics](https://en.wikipedia.org/wiki/Schwarzschild_geodesics) (see, e.g., [this page](http://spiro.fisica.unipd.it/~antonell/schwarzschild/)) using GLSL on the GPU, leveraging WebGL and [three.js](http://threejs.org). This should result to a fairly physically accurate gravitational lensing effect. The colors of the accretion disk are (obviously?) fake, and it can hidden from the [dat.GUI](http://code.google.com/p/dat-gui).
 
- * http://spiro.fisica.unipd.it/~antonell/schwarzschild/
- * https://en.wikipedia.org/wiki/Schwarzschild_geodesics
- * http://arxiv.org/pdf/gr-qc/9505010.pdf
- * https://kugelblitzblackholes.wordpress.com/2015/05/23/spherical-photon-orbits-around-a-kerr-black-hole/
-
-See also **[COPYRIGHT.md](https://github.com/oseiskar/black-hole/blob/master/COPYRIGHT.md)**
+There are some numerical artefacts related to the low step count required for real-time raytracing. First, the light paths bend a bit more than they should (see [numeric tests](https://github.com/oseiskar/black-hole/blob/numeric-notebooks/numeric_tests.ipynb)) with higher step sizes, but this seems to happen in a systematic way so that the image looks very similar in comparison to a more accurate simulation. The step sizes are also changed when toggling "gravitational time dilation", resulting to noticeable changes in the numerical artefacts. The "real" Shapiro delay effect is noticeable as apparent shearing of the planet when moving it very close to the black hole and viewing it from above.
