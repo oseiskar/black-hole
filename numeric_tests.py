@@ -5,6 +5,10 @@ from glsl_helpers import *
 
 degtorad = lambda a: a / 180.0 * np.pi
 
+def smooth_step(x, threshold, steepness):
+    #return np.arctan((x-threshold)/width)/M_PI+0.5
+    return 1.0 / (1.0 + exp(-(x-threshold)*steepness))
+
 def trace_u(pos, ray, path):
     """Main raytracer function"""
     
@@ -26,7 +30,7 @@ def trace_u(pos, ray, path):
     
     for j in range(n_steps):
         
-        max_rel_u_change = (1-np.log(u))*0.1
+        max_rel_u_change = (1-log(u))*10.0 / float(n_steps)
         
         step = theta_step
         if du > 0 and abs(du) > abs(max_rel_u_change*u) / theta_step:
@@ -54,7 +58,11 @@ def trace_u(pos, ray, path):
         
         # Far away, dr/dtheta becomes large and dt inaccurate:
         # Then just use a classical formula (no Shapiro delay)
-        if du < 0 and u < 1.0/10.0: dt = length(pos-old_pos)
+        mix = smooth_step(1.0/u, 8.0, 2.0)
+        dt = mix*length(pos-old_pos) + (1.0-mix)*dt
+        
+        #if du < 0 and u < 1.0/5.0:
+        
         t += dt
 
 

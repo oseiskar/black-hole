@@ -9,6 +9,8 @@ acos = np.arccos
 sin = np.sin
 cos = np.cos
 sqrt = np.sqrt
+exp = np.exp
+log = np.log
 
 M_PI = np.pi
 
