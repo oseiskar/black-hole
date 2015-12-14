@@ -8,7 +8,6 @@
 uniform vec2 resolution;
 uniform float time;
 
-uniform float fov_mult;
 uniform vec3 cam_pos;
 uniform vec3 cam_x;
 uniform vec3 cam_y;
@@ -38,6 +37,9 @@ const mat3 BG_COORDS = ROT_Y(45.0 * DEG_TO_RAD);
 // planet texture coordinate system
 const float PLANET_AXIAL_TILT = 30.0 * DEG_TO_RAD;
 const mat3 PLANET_COORDS = ROT_Y(PLANET_AXIAL_TILT);
+
+const float FOV_ANGLE_DEG = 90.0;
+const float FOV_MULT = 1.0 / tan(DEG_TO_RAD * FOV_ANGLE_DEG*0.5);
 
 // derived "constants" (from uniforms)
 float PLANET_RADIUS,
@@ -133,18 +135,20 @@ void main() {
     p.y *= resolution.y / resolution.x;
     
     vec3 pos = cam_pos;
-    vec3 ray = normalize(p.x*cam_x + p.y*cam_y + fov_mult*cam_z);
+    vec3 ray = normalize(p.x*cam_x + p.y*cam_y + FOV_MULT*cam_z);
     
     float step = 0.01;
     vec4 color = vec4(0.0,0.0,0.0,1.0);
     
+    // initial conditions
     float u = 1.0 / length(pos), old_u;
     
-    vec3 n = normalize(cross(pos, ray));
-    vec3 x = normalize(pos);
-    vec3 y = cross(n,x);
-    float du = -dot(ray,x) / dot(ray,y) * u;
-    float theta = 0.0;
+    vec3 normal_vec = normalize(pos);
+    vec3 tangent_vec = normalize(cross(cross(normal_vec, ray), normal_vec));
+    
+    float du = -dot(ray,normal_vec) / dot(ray,tangent_vec) * u;
+    
+    float phi = 0.0;
     float t = time;
     float dt = 0.0;
     
@@ -189,10 +193,10 @@ void main() {
         
         du += ddu*step;
         
-        theta += step;
+        phi += step;
         
         old_pos = pos;
-        pos = (cos(theta)*x + sin(theta)*y)/u;
+        pos = (cos(phi)*normal_vec + sin(phi)*tangent_vec)/u;
         
         ray = pos-old_pos;
         float solid_isec_t = 2.0;

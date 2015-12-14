@@ -103,8 +103,6 @@ function renderDataTexture(width, height, renderer) {
 
 function init(textures) {
 
-    var FOV_ANGLE_DEG = 90;
-
     container = document.createElement( 'div' );
     document.body.appendChild( container );
 
@@ -119,7 +117,6 @@ function init(textures) {
         cam_x: { type: "v3", value: new THREE.Vector3(1,0,0) },
         cam_y: { type: "v3", value: new THREE.Vector3(0,1,0) },
         cam_z: { type: "v3", value: new THREE.Vector3(0,0,1) },
-        fov_mult: { type: "f", value: 1.0 / Math.tan(degToRad(FOV_ANGLE_DEG*0.5)) },
         
         planet_distance: { type: "f" },
         planet_radius: { type: "f" },
