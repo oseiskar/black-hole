@@ -17,17 +17,17 @@ function Shader(mustacheTemplate) {
         gravitational_time_dilation: true,
         light_travel_time: true,
         time_scale: 1.0,
-    }
+    };
     var that = this;
     this.needsUpdate = false;
 
     this.hasMovingParts = function() {
         return this.parameters.planet;
-    }
+    };
 
     this.compile = function() {
         return Mustache.render(mustacheTemplate, that.parameters);
-    }
+    };
 }
 
 function degToRad(a) { return Math.PI * a / 180.0; }
@@ -48,7 +48,7 @@ function degToRad(a) { return Math.PI * a / 180.0; }
 
     function checkLoaded() {
         if (shader === null) return;
-        for (key in textures) if (textures[key] === null) return;
+        for (var key in textures) if (textures[key] === null) return;
         whenLoaded();
     }
 
@@ -198,7 +198,7 @@ function starBackgroundTexture(x,y) {
     var prob = 5.0 / TEX_RES;
     prob *= Math.cos((y-0.5)*Math.PI);
 
-    var s = Math.random()
+    var s = Math.random();
 
     if (s < prob) {
         s /= prob;
@@ -210,7 +210,7 @@ function starBackgroundTexture(x,y) {
 
 function accretionDiskTexture1D(x, y) {
     var s = x*Math.exp(-x*4.0)*(1.0-x) * Math.pow((Math.sin(x*Math.PI*20)+1.0)*0.5,0.1) * 20.0;
-    if (Math.ceil(y*50)%2 == 0) s *= 0.7;
+    if (Math.ceil(y*50)%2 === 0) s *= 0.7;
     return { r: s, g: s*0.8, b: s*0.5 };
 }
 
@@ -256,7 +256,7 @@ function updateCamera( event ) {
 
 function frobeniusDistance(matrix1, matrix2) {
     var sum = 0.0;
-    for (i in matrix1.elements) {
+    for (var i in matrix1.elements) {
         var diff = matrix1.elements[i] - matrix2.elements[i];
         sum += diff*diff;
     }
