@@ -178,8 +178,6 @@ void main() {
         {{/light_travel_time}}
 
         old_u = u;
-    
-        float ddu = -u*(1.0 - 1.5*u*u);
 
         {{#light_travel_time}}
         {{#gravitational_time_dilation}}
@@ -187,11 +185,12 @@ void main() {
         {{/gravitational_time_dilation}}
         {{/light_travel_time}}
 
+        // Leapfrog scheme
         u += du*step;
+        float ddu = -u*(1.0 - 1.5*u*u);
+        du += ddu*step;
 
         if (u < 0.0) break;
-
-        du += ddu*step;
 
         phi += step;
 
