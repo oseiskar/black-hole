@@ -59,6 +59,8 @@ function degToRad(a) { return Math.PI * a / 180.0; }
 
     var texLoader = new THREE.TextureLoader();
     texLoader.load('img/milkyway.jpg', function(tex) {
+        tex.magFilter = THREE.NearestFilter;
+        tex.minFilter = THREE.NearestFilter;
         textures.galaxy = tex;
         checkLoaded();
     });
