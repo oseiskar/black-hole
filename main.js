@@ -5,8 +5,6 @@ var container, stats;
 var camera, scene, renderer, cameraControls, shader = null;
 var uniforms;
 
-var TEX_RES = 2*1024;
-
 function Shader(mustacheTemplate) {
     // Compile-time shader parameters
     this.parameters = {
@@ -65,43 +63,12 @@ function degToRad(a) { return Math.PI * a / 180.0; }
         checkLoaded();
     });
 
-    texLoader.load('img/moon_1024.jpg', function(tex) {
-        textures.moon = tex;
-        checkLoaded();
-    });
-
-    textures.accretion_disk = renderDataTexture(TEX_RES, TEX_RES/4, accretionDiskTexture1D);
-    textures.stars = renderDataTexture(TEX_RES*2, TEX_RES, starBackgroundTexture);
+    textures.moon = ProceduralTextures.beachBall();
+    textures.accretion_disk = ProceduralTextures.accretionDisk();
+    textures.stars = ProceduralTextures.starBackground();
 
     checkLoaded();
 })();
-
-function renderDataTexture(width, height, renderer) {
-    // Generate random noise texture
-    var size = width * height;
-    var data = new Uint8Array( 3 * size );
-
-    function to8bit(f) {
-        return Math.round(Math.max(0, Math.min(f, 1.0))*255);
-    }
-
-    var i = 0;
-    for (var y=0; y<height; y++) {
-        for (var x=0; x<width; x++) {
-            var col = renderer(x/width,y/height);
-            data[i++] = to8bit(col.r);
-            data[i++] = to8bit(col.g);
-            data[i++] = to8bit(col.b);
-        }
-    }
-
-    var dt = new THREE.DataTexture( data, width, height, THREE.RGBFormat);
-    dt.magFilter = THREE.LinearFilter;
-    dt.minFilter = THREE.LinearFilter;
-    dt.needsUpdate = true;
-
-    return dt;
-}
 
 function init(textures) {
 
@@ -193,27 +160,6 @@ function setupGUI() {
     gui.add(shader.parameters, 'gravitational_time_dilation').onChange(updateShader);
     gui.add(shader.parameters, 'light_travel_time').onChange(updateShader);
     gui.add(shader.parameters, 'time_scale').min(0);
-}
-
-function starBackgroundTexture(x,y) {
-
-    var prob = 5.0 / TEX_RES;
-    prob *= Math.cos((y-0.5)*Math.PI);
-
-    var s = Math.random();
-
-    if (s < prob) {
-        s /= prob;
-        return { r: s, g: s, b: s };
-    }
-
-    return { r: 0, g: 0, b: 0 };
-}
-
-function accretionDiskTexture1D(x, y) {
-    var s = x*Math.exp(-x*4.0)*(1.0-x) * Math.pow((Math.sin(x*Math.PI*20)+1.0)*0.5,0.1) * 20.0;
-    if (Math.ceil(y*50)%2 === 0) s *= 0.7;
-    return { r: s, g: s*0.8, b: s*0.5 };
 }
 
 function onWindowResize( event ) {
