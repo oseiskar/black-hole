@@ -1,9 +1,21 @@
+"use strict"
+/*global THREE, SHADER_LOADER, Mustache, Stats, Detector, $, dat:false */
+/*global document, window, setTimeout, requestAnimationFrame:false */
+/*global ProceduralTextures:false */
 
 if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 
+
+function Observer() {
+    this.position = new THREE.Vector3(1,0,0);
+    this.velocity = new THREE.Vector3(0,1,0);
+    this.orientation = new THREE.Matrix3();
+    this.time = 0.0;
+}
+
 var container, stats;
 var camera, scene, renderer, cameraControls, shader = null;
-var uniforms;
+var observer = new Observer();
 
 function Shader(mustacheTemplate) {
     // Compile-time shader parameters
@@ -15,12 +27,14 @@ function Shader(mustacheTemplate) {
         gravitational_time_dilation: true,
         light_travel_time: true,
         time_scale: 1.0,
+        observer_motion: true,
+        observer_distance: 15.0
     };
     var that = this;
     this.needsUpdate = false;
 
     this.hasMovingParts = function() {
-        return this.parameters.planet;
+        return this.parameters.planet || this.parameters.observer_motion;
     };
 
     this.compile = function() {
@@ -70,6 +84,8 @@ function degToRad(a) { return Math.PI * a / 180.0; }
     checkLoaded();
 })();
 
+var updateUniforms;
+
 function init(textures) {
 
     container = document.createElement( 'div' );
@@ -79,13 +95,14 @@ function init(textures) {
 
     var geometry = new THREE.PlaneBufferGeometry( 2, 2 );
 
-    uniforms = {
-        time: { type: "f", value: 1.0 },
+    var uniforms = {
+        time: { type: "f", value: 0 },
         resolution: { type: "v2", value: new THREE.Vector2() },
-        cam_pos: { type: "v3", value: new THREE.Vector3(0,0,-0.5) },
-        cam_x: { type: "v3", value: new THREE.Vector3(1,0,0) },
-        cam_y: { type: "v3", value: new THREE.Vector3(0,1,0) },
-        cam_z: { type: "v3", value: new THREE.Vector3(0,0,1) },
+        cam_pos: { type: "v3", value: new THREE.Vector3() },
+        cam_x: { type: "v3", value: new THREE.Vector3() },
+        cam_y: { type: "v3", value: new THREE.Vector3() },
+        cam_z: { type: "v3", value: new THREE.Vector3() },
+        cam_vel: { type: "v3", value: new THREE.Vector3() },
 
         planet_distance: { type: "f" },
         planet_radius: { type: "f" },
@@ -96,13 +113,34 @@ function init(textures) {
         planet_texture: { type: "t", value: textures.moon },
     };
 
-    updateUniforms();
+    updateUniforms = function() {
+        uniforms.planet_distance.value = shader.parameters.planet_distance;
+        uniforms.planet_radius.value = shader.parameters.planet_radius;
+
+        uniforms.resolution.value.x = renderer.domElement.width;
+        uniforms.resolution.value.y = renderer.domElement.height;
+
+        uniforms.time.value = observer.time;
+        uniforms.cam_pos.value = observer.position;
+
+        var e = observer.orientation.elements;
+
+        uniforms.cam_x.value.set(e[0], e[1], e[2]);
+        uniforms.cam_y.value.set(e[3], e[4], e[5]);
+        uniforms.cam_z.value.set(e[6], e[7], e[8]);
+
+        function setVec(target, value) {
+            uniforms[target].value.set(value.x, value.y, value.z);
+        }
+
+        setVec('cam_pos', observer.position);
+        setVec('cam_vel', observer.velocity);
+    };
 
     var material = new THREE.ShaderMaterial( {
-
         uniforms: uniforms,
         vertexShader: $('#vertex-shader').text(),
-    } );
+    });
 
     scene.updateShader = function() {
         material.fragmentShader = shader.compile();
@@ -140,11 +178,6 @@ function init(textures) {
     setupGUI();
 }
 
-function updateUniforms() {
-    uniforms.planet_distance.value = shader.parameters.planet_distance;
-    uniforms.planet_radius.value = shader.parameters.planet_radius;
-}
-
 function setupGUI() {
 
     function updateShader() { scene.updateShader(); }
@@ -152,6 +185,7 @@ function setupGUI() {
     var gui = new dat.GUI();
     gui.add(shader.parameters, 'accretion_disk').onChange(updateShader);
 
+    gui.add(shader.parameters, 'observer_motion').onChange(updateShader);
 
     gui.add(shader.parameters, 'planet').onChange(updateShader);
     gui.add(shader.parameters, 'planet_distance').min(1.5).onChange(updateUniforms);
@@ -160,15 +194,12 @@ function setupGUI() {
     gui.add(shader.parameters, 'gravitational_time_dilation').onChange(updateShader);
     gui.add(shader.parameters, 'light_travel_time').onChange(updateShader);
     gui.add(shader.parameters, 'time_scale').min(0);
+
 }
 
 function onWindowResize( event ) {
-
     renderer.setSize( window.innerWidth, window.innerHeight );
-
-    uniforms.resolution.value.x = renderer.domElement.width;
-    uniforms.resolution.value.y = renderer.domElement.height;
-
+    updateUniforms();
 }
 
 function initializeCamera(camera) {
@@ -193,13 +224,22 @@ function updateCamera( event ) {
     var m = camera.matrixWorldInverse.elements;
 
     // y and z swapped for a nicer coordinate system
-    uniforms.cam_x.value.set(m[0], m[8], m[4]);
-    uniforms.cam_y.value.set(m[1], m[9], m[5]);
-    uniforms.cam_z.value.set(m[2], m[10], m[6]);
+    var camera_matrix = new THREE.Matrix3();
+    camera_matrix.set(
+        // row-major, not the same as .elements (nice)
+        m[0], m[1], m[2],
+        m[8], m[9], m[10],
+        m[4], m[5], m[6]
+    );
 
-    var p = uniforms.cam_z.value;
+    observer.orientation = camera_matrix;
 
-    uniforms.cam_pos.value.set(-p.x*dist, -p.y*dist, -p.z*dist);
+    var p = new THREE.Vector3(
+        camera_matrix.elements[6],
+        camera_matrix.elements[7],
+        camera_matrix.elements[8]);
+
+    observer.position.set(-p.x*dist, -p.y*dist, -p.z*dist);
 }
 
 function frobeniusDistance(matrix1, matrix2) {
@@ -232,7 +272,7 @@ var lastCameraMat = new THREE.Matrix4().identity();
 var getFrameDuration = (function() {
     var lastTimestamp = new Date().getTime();
     return function() {
-        timestamp = new Date().getTime();
+        var timestamp = new Date().getTime();
         var diff = (timestamp - lastTimestamp) / 1000.0;
         lastTimestamp = timestamp;
         return diff;
@@ -241,13 +281,14 @@ var getFrameDuration = (function() {
 
 function render() {
 
-    dt = getFrameDuration() * shader.parameters.time_scale;
+    var dt = getFrameDuration() * shader.parameters.time_scale;
 
     if (shader.parameters.gravitational_time_dilation) {
         var observer_r = camera.position.length();
         dt = dt * 1.0 / Math.sqrt(1-1.0/observer_r);
     }
 
-    uniforms.time.value += dt;
+    observer.time += dt;
+    updateUniforms();
     renderer.render( scene, camera );
 }
