@@ -12,6 +12,7 @@ uniform vec3 cam_pos;
 uniform vec3 cam_x;
 uniform vec3 cam_y;
 uniform vec3 cam_z;
+uniform vec3 cam_vel;
 
 uniform float planet_distance, planet_radius;
 
@@ -120,6 +121,21 @@ vec4 planet_intersection(vec3 old_pos, vec3 ray, float t, float dt, vec3 planet_
     return ret;
 }
 
+vec3 lorentz_velocity_transformation(vec3 moving_v, vec3 frame_v) {
+    float v = length(frame_v);
+    if (v > 0.0) {
+        vec3 v_axis = frame_v / v;
+        float gamma = 1.0/sqrt(1.0 - v*v);
+
+        float moving_par = dot(moving_v, v_axis);
+        vec3 moving_perp = moving_v - v_axis*moving_par;
+
+        float denom = 1.0 + v*moving_par;
+        return (v_axis*(moving_par+v)+moving_perp/gamma)/denom;
+    }
+    return moving_v;
+}
+
 void main() {
 
     {{#planet}}
@@ -136,6 +152,10 @@ void main() {
 
     vec3 pos = cam_pos;
     vec3 ray = normalize(p.x*cam_x + p.y*cam_y + FOV_MULT*cam_z);
+
+    {{#relativistic_abberation}}
+    ray = lorentz_velocity_transformation(ray, cam_vel);
+    {{/relativistic_abberation}}
 
     float step = 0.01;
     vec4 color = vec4(0.0,0.0,0.0,1.0);
