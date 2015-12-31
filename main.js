@@ -5,13 +5,62 @@
 
 if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 
-
 function Observer() {
-    this.position = new THREE.Vector3(1,0,0);
+    this.position = new THREE.Vector3(10,0,0);
     this.velocity = new THREE.Vector3(0,1,0);
     this.orientation = new THREE.Matrix3();
     this.time = 0.0;
 }
+
+Observer.prototype.orbitalFrame = function() {
+    var orbital_y = observer.velocity.clone().normalize();
+    var orbital_z = (new THREE.Vector3())
+        .crossVectors(orbital_y, observer.position).normalize();
+    var orbital_x = (new THREE.Vector3()).crossVectors(orbital_y, orbital_z);
+
+    return (new THREE.Matrix4()).makeBasis(
+        orbital_x,
+        orbital_y,
+        orbital_z
+    ).linearPart();
+};
+
+Observer.prototype.move = function(dt) {
+
+    dt *= shader.parameters.time_scale;
+
+    var r;
+    var v = 0;
+
+    // motion on a pre-defined cirular orbit
+    if (shader.parameters.observer_motion) {
+
+        r = shader.parameters.observer_distance;
+        v =  1.0 / Math.sqrt(2.0*(r-1.0));
+        var ang_vel = v / r;
+        var angle = -this.time * ang_vel;
+
+        var s = Math.sin(angle), c = Math.cos(angle);
+
+        this.position.set(c*r, s*r, 0);
+        this.velocity.set(-s*v, c*v, 0);
+
+        var alpha = degToRad(shader.parameters.observer_orbital_inclination);
+        var orbit_coords = (new THREE.Matrix4()).makeRotationY(alpha);
+
+        this.position.applyMatrix4(orbit_coords);
+        this.velocity.applyMatrix4(orbit_coords);
+    }
+    else {
+        r = this.position.length();
+    }
+
+    if (shader.parameters.gravitational_time_dilation) {
+        dt = Math.sqrt((dt*dt * (1.0 - v*v)) / (1-1.0/r));
+    }
+
+    this.time += dt;
+};
 
 var container, stats;
 var camera, scene, renderer, cameraControls, shader = null;
@@ -28,7 +77,8 @@ function Shader(mustacheTemplate) {
         light_travel_time: true,
         time_scale: 1.0,
         observer_motion: true,
-        observer_distance: 15.0
+        observer_distance: 15.0,
+        observer_orbital_inclination: 10
     };
     var that = this;
     this.needsUpdate = false;
@@ -185,7 +235,9 @@ function setupGUI() {
     var gui = new dat.GUI();
     gui.add(shader.parameters, 'accretion_disk').onChange(updateShader);
 
-    gui.add(shader.parameters, 'observer_motion').onChange(updateShader);
+    gui.add(shader.parameters, 'observer_motion').onChange(updateCamera);
+    gui.add(shader.parameters, 'observer_distance').min(1.1).max(30)
+        .onChange(updateCamera);
 
     gui.add(shader.parameters, 'planet').onChange(updateShader);
     gui.add(shader.parameters, 'planet_distance').min(1.5).onChange(updateUniforms);
@@ -204,8 +256,7 @@ function onWindowResize( event ) {
 
 function initializeCamera(camera) {
 
-    var pitchAngle = 10.0, yawAngle = 115.0;
-    var dist = 20.0;
+    var pitchAngle = 10.0, yawAngle = 100.0;
 
     // there are nicely named methods such as "lookAt" in the camera object
     // but there do not do a thing to the projection matrix due to an internal
@@ -215,31 +266,45 @@ function initializeCamera(camera) {
 
     var m = camera.matrixWorldInverse.elements;
 
-    camera.position.set(m[2]*dist, m[6]*dist, m[10]*dist);
+    camera.position.set(m[2], m[6], m[10]);
 }
 
 function updateCamera( event ) {
 
-    var dist = camera.position.length();
+    var zoom_dist = camera.position.length();
     var m = camera.matrixWorldInverse.elements;
+    var camera_matrix;
 
-    // y and z swapped for a nicer coordinate system
-    var camera_matrix = new THREE.Matrix3();
+    if (shader.parameters.observer_motion) {
+        camera_matrix = new THREE.Matrix3();
+    }
+    else {
+        camera_matrix = observer.orientation;
+    }
+
     camera_matrix.set(
         // row-major, not the same as .elements (nice)
+        // y and z swapped for a nicer coordinate system
         m[0], m[1], m[2],
         m[8], m[9], m[10],
         m[4], m[5], m[6]
     );
 
-    observer.orientation = camera_matrix;
+    if (shader.parameters.observer_motion) {
 
-    var p = new THREE.Vector3(
-        camera_matrix.elements[6],
-        camera_matrix.elements[7],
-        camera_matrix.elements[8]);
+        observer.orientation = observer.orbitalFrame().multiply(camera_matrix);
 
-    observer.position.set(-p.x*dist, -p.y*dist, -p.z*dist);
+    } else {
+
+        var p = new THREE.Vector3(
+            camera_matrix.elements[6],
+            camera_matrix.elements[7],
+            camera_matrix.elements[8]);
+
+        var dist = shader.parameters.observer_distance;
+        observer.position.set(-p.x*dist, -p.y*dist, -p.z*dist);
+        observer.velocity.set(0,0,0);
+    }
 }
 
 function frobeniusDistance(matrix1, matrix2) {
@@ -280,15 +345,8 @@ var getFrameDuration = (function() {
 })();
 
 function render() {
-
-    var dt = getFrameDuration() * shader.parameters.time_scale;
-
-    if (shader.parameters.gravitational_time_dilation) {
-        var observer_r = camera.position.length();
-        dt = dt * 1.0 / Math.sqrt(1-1.0/observer_r);
-    }
-
-    observer.time += dt;
+    observer.move(getFrameDuration());
+    if (shader.parameters.observer_motion) updateCamera();
     updateUniforms();
     renderer.render( scene, camera );
 }
