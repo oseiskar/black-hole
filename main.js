@@ -75,6 +75,7 @@ function Shader(mustacheTemplate) {
         planet_radius: 0.4,
         gravitational_time_dilation: true,
         relativistic_abberation: true,
+        relativistic_beaming: true,
         light_travel_time: true,
         time_scale: 1.0,
         observer_motion: true,
@@ -237,7 +238,7 @@ function setupGUI() {
     gui.add(shader.parameters, 'accretion_disk').onChange(updateShader);
 
     gui.add(shader.parameters, 'observer_motion').onChange(updateCamera);
-    gui.add(shader.parameters, 'observer_distance').min(1.1).max(30)
+    gui.add(shader.parameters, 'observer_distance').min(1.5).max(30)
         .onChange(updateCamera);
 
     gui.add(shader.parameters, 'planet').onChange(updateShader);
@@ -245,6 +246,7 @@ function setupGUI() {
     gui.add(shader.parameters, 'planet_radius').min(0.01).max(2.0).onChange(updateUniforms);
 
     gui.add(shader.parameters, 'relativistic_abberation').onChange(updateShader);
+    gui.add(shader.parameters, 'relativistic_beaming').onChange(updateShader);
 
     gui.add(shader.parameters, 'gravitational_time_dilation').onChange(updateShader);
     gui.add(shader.parameters, 'light_travel_time').onChange(updateShader);

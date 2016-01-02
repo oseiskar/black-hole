@@ -25,7 +25,7 @@ const float MAX_REVOLUTIONS = 2.0;
 
 const float ACCRETION_MIN_R = 1.5;
 const float ACCRETION_WIDTH = 5.0;
-const float ACCRETION_BRIGHTNESS = 2.0;
+const float ACCRETION_BRIGHTNESS = 1.0;
 const float STAR_BRIGHTNESS = 1.0;
 const float GALAXY_BRIGHTNESS = 0.5;
 
@@ -157,6 +157,13 @@ void main() {
     ray = lorentz_velocity_transformation(ray, cam_vel);
     {{/relativistic_abberation}}
 
+    float ray_intensity = 1.0;
+    {{#relativistic_beaming}}
+    float gamma = 1.0/sqrt(1.0-dot(cam_vel,cam_vel));
+    float doppler_factor = gamma*(1.0 + dot(ray,cam_vel));
+    ray_intensity /= doppler_factor*doppler_factor*doppler_factor;
+    {{/relativistic_beaming}}
+
     float step = 0.01;
     vec4 color = vec4(0.0,0.0,0.0,1.0);
 
@@ -219,14 +226,15 @@ void main() {
 
         ray = pos-old_pos;
         float solid_isec_t = 2.0;
+        float ray_l = length(ray);
 
         {{#light_travel_time}}
         {{#gravitational_time_dilation}}
         float mix = smooth_step(1.0/u, 8.0);
-        dt = mix*length(ray) + (1.0-mix)*dt;
+        dt = mix*ray_l + (1.0-mix)*dt;
         {{/gravitational_time_dilation}}
         {{^gravitational_time_dilation}}
-        dt = length(ray);
+        dt = ray_l;
         {{/gravitational_time_dilation}}
         {{/light_travel_time}}
 
@@ -270,14 +278,15 @@ void main() {
                             atan(isec.x, isec.y)/M_PI*0.5+0.5
                     );
 
-                    // accretion disk time evolution
-                    //float rot_phase = 1.0 / sqrt(2.0*(r-1.0)) * time * 0.5 / M_PI;
-                    //tex_coord.y = mod(tex_coord.x + rot_phase, 1.0);
+                    float accretion_intensity = ACCRETION_BRIGHTNESS;
+                    {{#relativistic_beaming}}
+                    vec3 accretion_v = -vec3(-isec.y, isec.x, 0.0) / sqrt(2.0*(r-1.0)) / (r*r);
+                    gamma = 1.0/sqrt(1.0-dot(accretion_v,accretion_v));
+                    doppler_factor = gamma*(1.0+dot(ray/ray_l,accretion_v));
+                    accretion_intensity /= doppler_factor*doppler_factor*doppler_factor;
+                    {{/relativistic_beaming}}
 
-                    color += texture2D(accretion_disk_texture,tex_coord) * ACCRETION_BRIGHTNESS;
-
-                    // opaque disk
-                    //if (r < ACCRETION_MIN_R+ACCRETION_WIDTH) { solid_isec_t = 0.5; }
+                    color += texture2D(accretion_disk_texture,tex_coord) * accretion_intensity;
                 }
             }
         }
@@ -300,5 +309,5 @@ void main() {
         color += texture2D(galaxy_texture, tex_coord) * GALAXY_BRIGHTNESS;
     }
 
-    gl_FragColor = color;
+    gl_FragColor = color*ray_intensity;
 }
