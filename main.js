@@ -73,6 +73,7 @@ function Shader(mustacheTemplate) {
         planet: true,
         planet_distance: 8.0,
         planet_radius: 0.4,
+        lorentz_contraction: true,
         gravitational_time_dilation: true,
         relativistic_abberation: true,
         relativistic_beaming: true,
@@ -244,6 +245,7 @@ function setupGUI() {
     gui.add(shader.parameters, 'planet').onChange(updateShader);
     gui.add(shader.parameters, 'planet_distance').min(1.5).onChange(updateUniforms);
     gui.add(shader.parameters, 'planet_radius').min(0.01).max(2.0).onChange(updateUniforms);
+    gui.add(shader.parameters, 'lorentz_contraction').onChange(updateShader);
 
     gui.add(shader.parameters, 'relativistic_abberation').onChange(updateShader);
     gui.add(shader.parameters, 'relativistic_beaming').onChange(updateShader);

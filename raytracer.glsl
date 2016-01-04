@@ -46,7 +46,8 @@ const float FOV_MULT = 1.0 / tan(DEG_TO_RAD * FOV_ANGLE_DEG*0.5);
 float PLANET_RADIUS,
     PLANET_DISTANCE,
     PLANET_ORBITAL_ANG_VEL,
-    PLANET_ROTATION_ANG_VEL;
+    PLANET_ROTATION_ANG_VEL,
+    PLANET_GAMMA;
 
 vec2 sphere_map(vec3 p) {
     return vec2(atan(p.x,p.y)/M_PI*0.5+0.5, asin(p.z)/M_PI+0.5);
@@ -57,74 +58,10 @@ float smooth_step(float x, float threshold) {
     return 1.0 / (1.0 + exp(-(x-threshold)*STEEPNESS));
 }
 
-vec4 planet_intersection(vec3 old_pos, vec3 ray, float t, float dt, vec3 planet_pos0) {
-
-    vec4 ret = vec4(0,0,0,0);
-
-    {{#light_travel_time}}
-    float planet_ang1 = (t-dt) * PLANET_ORBITAL_ANG_VEL;
-    vec3 planet_pos1 = vec3(cos(planet_ang1), sin(planet_ang1), 0)*PLANET_DISTANCE;
-    vec3 planet_vel = (planet_pos1-planet_pos0)/dt;
-
-    // transform to moving planet coordinate system
-    vec3 rel_ray = ray/dt - planet_vel;
-
-    // ray-sphere intersection
-    vec3 d = old_pos - planet_pos0;
-    float dotp = dot(d,rel_ray);
-    float c_coeff = dot(d,d) - SQ(PLANET_RADIUS);
-    float ray2 = dot(rel_ray, rel_ray);
-    float discr = dotp*dotp - ray2*c_coeff;
-
-    if (discr < 0.0) return ret;
-
-    float isec_t = (-dotp - sqrt(discr)) / ray2;
-
-    if (isec_t < 0.0 || isec_t > dt) return ret;
-
-    vec3 surface_point = (old_pos + isec_t*rel_ray - planet_pos0) / PLANET_RADIUS;
-    vec3 light_dir = (planet_pos0 + planet_vel*isec_t)/PLANET_DISTANCE;
-    float rot_phase = (t-isec_t)*PLANET_ROTATION_ANG_VEL*0.5/M_PI;
-
-    isec_t = isec_t/dt;
-
-    {{/light_travel_time}}
-    {{^light_travel_time}}
-
-    // ray-sphere intersection
-    vec3 d = old_pos - planet_pos0;
-    float dotp = dot(d,ray);
-    float c_coeff = dot(d,d) - SQ(PLANET_RADIUS);
-    float ray2 = dot(ray, ray);
-    float discr = dotp*dotp - ray2*c_coeff;
-
-    if (discr < 0.0) return ret;
-    float isec_t = (-dotp - sqrt(discr)) / ray2;
-
-    if (isec_t < 0.0 || isec_t > 1.0) return ret;
-
-    vec3 surface_point = (old_pos + isec_t*ray - planet_pos0) / PLANET_RADIUS;
-    float rot_phase = t*PLANET_ROTATION_ANG_VEL*0.5/M_PI;
-    vec3 light_dir = planet_pos0/PLANET_DISTANCE;
-
-    {{/light_travel_time}}
-
-    vec2 tex_coord = sphere_map(surface_point * PLANET_COORDS);
-    tex_coord.x = mod(tex_coord.x + rot_phase, 1.0);
-
-    float diffuse = max(0.0, dot(surface_point, -light_dir));
-    float lightness = ((1.0-PLANET_AMBIENT)*diffuse + PLANET_AMBIENT);
-
-    ret = texture2D(planet_texture, tex_coord) * lightness;
-    ret.w = isec_t;
-
-    return ret;
-}
-
 vec3 lorentz_velocity_transformation(vec3 moving_v, vec3 frame_v) {
     float v = length(frame_v);
     if (v > 0.0) {
-        vec3 v_axis = frame_v / v;
+        vec3 v_axis = -frame_v / v;
         float gamma = 1.0/sqrt(1.0 - v*v);
 
         float moving_par = dot(moving_v, v_axis);
@@ -136,6 +73,86 @@ vec3 lorentz_velocity_transformation(vec3 moving_v, vec3 frame_v) {
     return moving_v;
 }
 
+vec3 contract(vec3 x, vec3 d, float mult) {
+    float par = dot(x,d);
+    return (x-par*d) + d*par*mult;
+}
+
+vec4 planet_intersection(vec3 old_pos, vec3 ray, float t, float dt, vec3 planet_pos0) {
+
+    vec4 ret = vec4(0,0,0,0);
+    vec3 ray0 = ray;
+    ray = ray/dt;
+
+    {{#lorentz_contraction}}
+    vec3 planet_dir = vec3(-planet_pos0.y, planet_pos0.x, 0.0) / PLANET_DISTANCE;
+    {{/lorentz_contraction}}
+
+    {{#light_travel_time}}
+    float planet_ang1 = (t-dt) * PLANET_ORBITAL_ANG_VEL;
+    vec3 planet_pos1 = vec3(cos(planet_ang1), sin(planet_ang1), 0)*PLANET_DISTANCE;
+    vec3 planet_vel = (planet_pos1-planet_pos0)/dt;
+
+    // transform to moving planet coordinate system
+    ray = ray - planet_vel;
+    {{/light_travel_time}}
+
+    // ray-sphere intersection
+    vec3 d = old_pos - planet_pos0;
+
+    {{#lorentz_contraction}}
+    ray = contract(ray, planet_dir, PLANET_GAMMA);
+    d = contract(d, planet_dir, PLANET_GAMMA);
+    {{/lorentz_contraction}}
+
+    float dotp = dot(d,ray);
+    float c_coeff = dot(d,d) - SQ(PLANET_RADIUS);
+    float ray2 = dot(ray, ray);
+    float discr = dotp*dotp - ray2*c_coeff;
+
+    if (discr < 0.0) return ret;
+    float isec_t = (-dotp - sqrt(discr)) / ray2;
+
+    float MIN_ISEC_DT = 0.0;
+    {{#lorentz_contraction}}
+    MIN_ISEC_DT = -dt;
+    {{/lorentz_contraction}}
+
+    if (isec_t < MIN_ISEC_DT || isec_t > dt) return ret;
+
+    vec3 surface_point = (d + isec_t*ray) / PLANET_RADIUS;
+
+    isec_t = isec_t/dt;
+
+    vec3 light_dir = planet_pos0;
+    float rot_phase = t;
+
+    {{#light_travel_time}}
+    light_dir += planet_vel*isec_t*dt;
+    rot_phase -= isec_t*dt;
+    {{/light_travel_time}}
+
+    rot_phase = rot_phase * PLANET_ROTATION_ANG_VEL*0.5/M_PI;
+    light_dir = light_dir / PLANET_DISTANCE;
+
+    vec3 surface_normal = surface_point;
+    {{#lorentz_contraction}}
+    surface_normal = normalize(contract(surface_point, planet_dir, 1.0/PLANET_GAMMA));
+    {{/lorentz_contraction}}
+
+    vec2 tex_coord = sphere_map(surface_point * PLANET_COORDS);
+    tex_coord.x = mod(tex_coord.x + rot_phase, 1.0);
+
+    float diffuse = max(0.0, dot(surface_normal, -light_dir));
+    float lightness = ((1.0-PLANET_AMBIENT)*diffuse + PLANET_AMBIENT);
+
+    ret = texture2D(planet_texture, tex_coord) * lightness;
+    if (isec_t < 0.0) isec_t = 0.5;
+    ret.w = isec_t;
+
+    return ret;
+}
+
 void main() {
 
     {{#planet}}
@@ -145,6 +162,7 @@ void main() {
     PLANET_ORBITAL_ANG_VEL = 1.0 / sqrt(2.0*(PLANET_DISTANCE-1.0)) / PLANET_DISTANCE;
     float MAX_PLANET_ROT = max((1.0 - PLANET_ORBITAL_ANG_VEL*PLANET_DISTANCE) / PLANET_RADIUS,0.0);
     PLANET_ROTATION_ANG_VEL = -PLANET_ORBITAL_ANG_VEL - MAX_PLANET_ROT * 0.5;
+    PLANET_GAMMA = 1.0/sqrt(1.0-SQ(PLANET_ORBITAL_ANG_VEL*PLANET_DISTANCE));
     {{/planet}}
 
     vec2 p = -1.0 + 2.0 * gl_FragCoord.xy / resolution.xy;
@@ -154,7 +172,7 @@ void main() {
     vec3 ray = normalize(p.x*cam_x + p.y*cam_y + FOV_MULT*cam_z);
 
     {{#relativistic_abberation}}
-    ray = lorentz_velocity_transformation(ray, cam_vel);
+    ray = lorentz_velocity_transformation(ray, -cam_vel);
     {{/relativistic_abberation}}
 
     float ray_intensity = 1.0;
@@ -177,7 +195,7 @@ void main() {
 
     float phi = 0.0;
     float t = time;
-    float dt = 0.0;
+    float dt = 1.0;
 
     {{^light_travel_time}}
     float planet_ang0 = t * PLANET_ORBITAL_ANG_VEL;
