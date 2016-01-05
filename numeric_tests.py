@@ -16,14 +16,14 @@ def trace_u(pos, ray, path):
     
     u = 1.0 / length(pos)
     
-    n = normalize(cross(pos, ray))
-    x = normalize(pos)
-    y = cross(n,x)
+    normal_vec = normalize(pos)
+    tangent_vec = normalize(cross(cross(normal_vec, ray), normal_vec))
     
-    du = -dot(ray,x) / dot(ray,y) * u
+    du = -dot(ray,normal_vec) / dot(ray,tangent_vec) * u
     
     theta = 0
     t = 0
+    ddu = 0
     
     MAX_REVOLUTIONS = 2
     theta_step = 2.0*M_PI*MAX_REVOLUTIONS / float(n_steps)
@@ -39,20 +39,17 @@ def trace_u(pos, ray, path):
         path[j,0:3] = pos
         path[j,3] = t
 
+        u += du*step
         ddu = -u*(1.0 - 1.5*u*u)
+        du += ddu*step
         
+        if u < 0.0: break
         if u < 1.0: dt = sqrt(du*du + u*u*(1.0-u))/(u*u*(1.0-u))*step
         
-        u += du*step
-
-        if u < 0.0: break
-
-        du += ddu*step
-
         theta += step
 
         old_pos = pos
-        pos = (cos(theta)*x + sin(theta)*y)/u
+        pos = (cos(theta)*normal_vec + sin(theta)*tangent_vec)/u
         
         if u > 1.0: break # even horizon is at 1
         

@@ -1,3 +1,7 @@
 .ipynb_checkpoints
 img/milkyway.png
 *.pyc
+scratch.txt
+
+# not sure if the CIE data files are public
+data/*.csv
