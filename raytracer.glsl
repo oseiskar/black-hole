@@ -17,7 +17,7 @@ uniform vec3 cam_vel;
 uniform float planet_distance, planet_radius;
 
 uniform sampler2D galaxy_texture, star_texture,
-    accretion_disk_texture, planet_texture;
+    accretion_disk_texture, planet_texture, spectrum_texture;
 
 // stepping parameters
 const int NSTEPS = 200;
@@ -25,7 +25,12 @@ const float MAX_REVOLUTIONS = 2.0;
 
 const float ACCRETION_MIN_R = 1.5;
 const float ACCRETION_WIDTH = 5.0;
-const float ACCRETION_BRIGHTNESS = 1.0;
+const float ACCRETION_BRIGHTNESS = 0.7;
+const float ACCRETION_TEMPERATURE = 4000.0;
+
+const float SPECRUM_TEX_TEMPERATURE_RANGE = 65504.0;
+const float BLACK_BODY_TEXTURE_COORD = 1.0;
+
 const float STAR_BRIGHTNESS = 1.0;
 const float GALAXY_BRIGHTNESS = 0.5;
 
@@ -176,10 +181,12 @@ void main() {
     {{/relativistic_abberation}}
 
     float ray_intensity = 1.0;
-    {{#relativistic_beaming}}
+    float ray_doppler_factor = 1.0;
+
     float gamma = 1.0/sqrt(1.0-dot(cam_vel,cam_vel));
-    float doppler_factor = gamma*(1.0 + dot(ray,cam_vel));
-    ray_intensity /= doppler_factor*doppler_factor*doppler_factor;
+    ray_doppler_factor = gamma*(1.0 + dot(ray,cam_vel));
+    {{#relativistic_beaming}}
+    ray_intensity /= ray_doppler_factor*ray_doppler_factor*ray_doppler_factor;
     {{/relativistic_beaming}}
 
     float step = 0.01;
@@ -297,14 +304,24 @@ void main() {
                     );
 
                     float accretion_intensity = ACCRETION_BRIGHTNESS;
-                    {{#relativistic_beaming}}
+                    float temperature_coord = ACCRETION_TEMPERATURE/SPECRUM_TEX_TEMPERATURE_RANGE;
+
                     vec3 accretion_v = -vec3(-isec.y, isec.x, 0.0) / sqrt(2.0*(r-1.0)) / (r*r);
                     gamma = 1.0/sqrt(1.0-dot(accretion_v,accretion_v));
-                    doppler_factor = gamma*(1.0+dot(ray/ray_l,accretion_v));
+                    float doppler_factor = gamma*(1.0+dot(ray/ray_l,accretion_v));
+                    {{#relativistic_beaming}}
                     accretion_intensity /= doppler_factor*doppler_factor*doppler_factor;
                     {{/relativistic_beaming}}
+                    {{#doppler_shift}}
+                    temperature_coord /= ray_doppler_factor*doppler_factor;
+                    {{/doppler_shift}}
 
-                    color += texture2D(accretion_disk_texture,tex_coord) * accretion_intensity;
+
+                    color += texture2D(accretion_disk_texture,tex_coord)
+                        * accretion_intensity
+                        * texture2D(spectrum_texture, vec2(
+                            temperature_coord,
+                            BLACK_BODY_TEXTURE_COORD));
                 }
             }
         }

@@ -54,7 +54,7 @@ ProceduralTextures = {
       return renderDataTexture(TEX_RES, TEX_RES/4, function(x,y) {
           var s = x*Math.exp(-x*4.0)*(1.0-x) * Math.pow((Math.sin(x*Math.PI*20)+1.0)*0.5,0.1) * 20.0;
           if (Math.ceil(y*50)%2 === 0) s *= 0.7;
-          return { r: s, g: s*0.8, b: s*0.5 };
+          return { r: s, g: s, b: s };
       });
   },
 

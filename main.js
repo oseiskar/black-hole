@@ -77,6 +77,7 @@ function Shader(mustacheTemplate) {
         gravitational_time_dilation: true,
         relativistic_abberation: true,
         relativistic_beaming: true,
+        doppler_shift: true,
         light_travel_time: true,
         time_scale: 1.0,
         observer_motion: true,
@@ -102,7 +103,8 @@ function degToRad(a) { return Math.PI * a / 180.0; }
         galaxy: null,
         accretion_disk: null,
         stars: null,
-        moon: null
+        moon: null,
+        spectra: null
     };
 
     function whenLoaded() {
@@ -127,6 +129,13 @@ function degToRad(a) { return Math.PI * a / 180.0; }
         tex.magFilter = THREE.NearestFilter;
         tex.minFilter = THREE.NearestFilter;
         textures.galaxy = tex;
+        checkLoaded();
+    });
+
+    texLoader.load('img/spectra.png', function(tex) {
+        tex.magFilter = THREE.NearestFilter;
+        tex.minFilter = THREE.NearestFilter;
+        textures.spectra = tex;
         checkLoaded();
     });
 
@@ -164,6 +173,7 @@ function init(textures) {
         accretion_disk_texture: { type: "t",  value: textures.accretion_disk },
         galaxy_texture: { type: "t", value: textures.galaxy },
         planet_texture: { type: "t", value: textures.moon },
+        spectrum_texture: { type: "t", value: textures.spectra }
     };
 
     updateUniforms = function() {
@@ -249,6 +259,7 @@ function setupGUI() {
 
     gui.add(shader.parameters, 'relativistic_abberation').onChange(updateShader);
     gui.add(shader.parameters, 'relativistic_beaming').onChange(updateShader);
+    gui.add(shader.parameters, 'doppler_shift').onChange(updateShader);
 
     gui.add(shader.parameters, 'gravitational_time_dilation').onChange(updateShader);
     gui.add(shader.parameters, 'light_travel_time').onChange(updateShader);
