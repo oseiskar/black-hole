@@ -38,14 +38,14 @@ const float GALAXY_BRIGHTNESS = 0.5;
 const float PLANET_AMBIENT = 0.1;
 
 // background texture coordinate system
-const mat3 BG_COORDS = ROT_Y(45.0 * DEG_TO_RAD);
+mat3 BG_COORDS = ROT_Y(45.0 * DEG_TO_RAD);
 
 // planet texture coordinate system
 const float PLANET_AXIAL_TILT = 30.0 * DEG_TO_RAD;
-const mat3 PLANET_COORDS = ROT_Y(PLANET_AXIAL_TILT);
+mat3 PLANET_COORDS = ROT_Y(PLANET_AXIAL_TILT);
 
 const float FOV_ANGLE_DEG = 90.0;
-const float FOV_MULT = 1.0 / tan(DEG_TO_RAD * FOV_ANGLE_DEG*0.5);
+float FOV_MULT = 1.0 / tan(DEG_TO_RAD * FOV_ANGLE_DEG*0.5);
 
 // derived "constants" (from uniforms)
 float PLANET_RADIUS,
