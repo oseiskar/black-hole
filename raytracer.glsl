@@ -31,6 +31,9 @@ const float ACCRETION_TEMPERATURE = 4000.0;
 const float SPECRUM_TEX_TEMPERATURE_RANGE = 65504.0;
 const float BLACK_BODY_TEXTURE_COORD = 1.0;
 
+const float STAR_MIN_TEMPERATURE = 4000.0;
+const float STAR_MAX_TEMPERATURE = 15000.0;
+
 const float STAR_BRIGHTNESS = 1.0;
 const float GALAXY_BRIGHTNESS = 0.5;
 
@@ -188,6 +191,9 @@ void main() {
     {{#beaming}}
     ray_intensity /= ray_doppler_factor*ray_doppler_factor*ray_doppler_factor;
     {{/beaming}}
+    {{^doppler_shift}}
+    ray_doppler_factor = 1.0;
+    {{/doppler_shift}}
 
     float step = 0.01;
     vec4 color = vec4(0.0,0.0,0.0,1.0);
@@ -317,7 +323,6 @@ void main() {
                     temperature_coord /= ray_doppler_factor*doppler_factor;
                     {{/doppler_shift}}
 
-
                     color += texture2D(accretion_disk_texture,tex_coord)
                         * accretion_intensity
                         * texture2D(spectrum_texture, vec2(
@@ -341,7 +346,16 @@ void main() {
         ray = normalize(pos - old_pos);
         vec2 tex_coord = sphere_map(ray * BG_COORDS);
 
-        color += texture2D(star_texture, tex_coord) * STAR_BRIGHTNESS;
+        vec4 star_color = texture2D(star_texture, tex_coord);
+        if (star_color.r > 0.0) {
+            float t_coord = (STAR_MIN_TEMPERATURE +
+                (STAR_MAX_TEMPERATURE-STAR_MIN_TEMPERATURE) * star_color.g)
+                / SPECRUM_TEX_TEMPERATURE_RANGE / ray_doppler_factor;
+
+            color += texture2D(spectrum_texture, vec2(
+                t_coord,
+                BLACK_BODY_TEXTURE_COORD)) * star_color.r * STAR_BRIGHTNESS;
+        }
         color += texture2D(galaxy_texture, tex_coord) * GALAXY_BRIGHTNESS;
     }
 

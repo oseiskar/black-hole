@@ -71,7 +71,7 @@ ProceduralTextures = {
 
           if (s < prob) {
               s /= prob;
-              return { r: s, g: s, b: s };
+              return { r: s, g: Math.random(), b: 0 };
           }
 
           return { r: 0, g: 0, b: 0 };
