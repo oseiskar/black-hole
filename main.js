@@ -33,9 +33,9 @@ Observer.prototype.move = function(dt) {
     var v = 0;
 
     // motion on a pre-defined cirular orbit
-    if (shader.parameters.observer_motion) {
+    if (shader.parameters.observer.motion) {
 
-        r = shader.parameters.observer_distance;
+        r = shader.parameters.observer.distance;
         v =  1.0 / Math.sqrt(2.0*(r-1.0));
         var ang_vel = v / r;
         var angle = -this.time * ang_vel;
@@ -45,7 +45,7 @@ Observer.prototype.move = function(dt) {
         this.position.set(c*r, s*r, 0);
         this.velocity.set(-s*v, c*v, 0);
 
-        var alpha = degToRad(shader.parameters.observer_orbital_inclination);
+        var alpha = degToRad(shader.parameters.observer.orbital_inclination);
         var orbit_coords = (new THREE.Matrix4()).makeRotationY(alpha);
 
         this.position.applyMatrix4(orbit_coords);
@@ -70,25 +70,33 @@ function Shader(mustacheTemplate) {
     // Compile-time shader parameters
     this.parameters = {
         accretion_disk: true,
-        planet: true,
-        planet_distance: 8.0,
-        planet_radius: 0.4,
+        planet: {
+            enabled: true,
+            distance: 7.0,
+            radius: 0.4
+        },
         lorentz_contraction: true,
         gravitational_time_dilation: true,
-        relativistic_abberation: true,
-        relativistic_beaming: true,
+        abberation: true,
+        beaming: true,
         doppler_shift: true,
         light_travel_time: true,
         time_scale: 1.0,
-        observer_motion: true,
-        observer_distance: 15.0,
-        observer_orbital_inclination: 10
+        observer: {
+            motion: true,
+            distance: 11.0,
+            orbital_inclination: 10
+        },
+
+        planetEnabled: function() {
+            return this.planet.enabled;
+        }
     };
     var that = this;
     this.needsUpdate = false;
 
     this.hasMovingParts = function() {
-        return this.parameters.planet || this.parameters.observer_motion;
+        return this.parameters.planet.enabled || this.parameters.observer.motion;
     };
 
     this.compile = function() {
@@ -177,8 +185,8 @@ function init(textures) {
     };
 
     updateUniforms = function() {
-        uniforms.planet_distance.value = shader.parameters.planet_distance;
-        uniforms.planet_radius.value = shader.parameters.planet_radius;
+        uniforms.planet_distance.value = shader.parameters.planet.distance;
+        uniforms.planet_radius.value = shader.parameters.planet.radius;
 
         uniforms.resolution.value.x = renderer.domElement.width;
         uniforms.resolution.value.y = renderer.domElement.height;
@@ -246,24 +254,33 @@ function setupGUI() {
     function updateShader() { scene.updateShader(); }
 
     var gui = new dat.GUI();
+
     gui.add(shader.parameters, 'accretion_disk').onChange(updateShader);
 
-    gui.add(shader.parameters, 'observer_motion').onChange(updateCamera);
-    gui.add(shader.parameters, 'observer_distance').min(1.5).max(30)
+    var folder = gui.addFolder('Observer');
+    folder.add(shader.parameters.observer, 'motion').onChange(updateCamera);
+    folder.add(shader.parameters.observer, 'distance').min(1.5).max(30)
         .onChange(updateCamera);
+    //folder.open();
 
-    gui.add(shader.parameters, 'planet').onChange(updateShader);
-    gui.add(shader.parameters, 'planet_distance').min(1.5).onChange(updateUniforms);
-    gui.add(shader.parameters, 'planet_radius').min(0.01).max(2.0).onChange(updateUniforms);
-    gui.add(shader.parameters, 'lorentz_contraction').onChange(updateShader);
+    folder = gui.addFolder('Planet');
+    folder.add(shader.parameters.planet, 'enabled').onChange(updateShader);
+    folder.add(shader.parameters.planet, 'distance').min(1.5).onChange(updateUniforms);
+    folder.add(shader.parameters.planet, 'radius').min(0.01).max(2.0).onChange(updateUniforms);
+    //folder.open();
 
-    gui.add(shader.parameters, 'relativistic_abberation').onChange(updateShader);
-    gui.add(shader.parameters, 'relativistic_beaming').onChange(updateShader);
-    gui.add(shader.parameters, 'doppler_shift').onChange(updateShader);
+    folder = gui.addFolder('Relativistic effects');
+    folder.add(shader.parameters, 'abberation').onChange(updateShader);
+    folder.add(shader.parameters, 'beaming').onChange(updateShader);
+    folder.add(shader.parameters, 'doppler_shift').onChange(updateShader);
+    folder.add(shader.parameters, 'gravitational_time_dilation').onChange(updateShader);
+    folder.add(shader.parameters, 'lorentz_contraction').onChange(updateShader);
+    folder.open();
 
-    gui.add(shader.parameters, 'gravitational_time_dilation').onChange(updateShader);
-    gui.add(shader.parameters, 'light_travel_time').onChange(updateShader);
-    gui.add(shader.parameters, 'time_scale').min(0);
+    folder = gui.addFolder('Time');
+    folder.add(shader.parameters, 'light_travel_time').onChange(updateShader);
+    folder.add(shader.parameters, 'time_scale').min(0);
+    //folder.open();
 
 }
 
@@ -293,7 +310,7 @@ function updateCamera( event ) {
     var m = camera.matrixWorldInverse.elements;
     var camera_matrix;
 
-    if (shader.parameters.observer_motion) {
+    if (shader.parameters.observer.motion) {
         camera_matrix = new THREE.Matrix3();
     }
     else {
@@ -308,7 +325,7 @@ function updateCamera( event ) {
         m[4], m[5], m[6]
     );
 
-    if (shader.parameters.observer_motion) {
+    if (shader.parameters.observer.motion) {
 
         observer.orientation = observer.orbitalFrame().multiply(camera_matrix);
 
@@ -319,7 +336,7 @@ function updateCamera( event ) {
             camera_matrix.elements[7],
             camera_matrix.elements[8]);
 
-        var dist = shader.parameters.observer_distance;
+        var dist = shader.parameters.observer.distance;
         observer.position.set(-p.x*dist, -p.y*dist, -p.z*dist);
         observer.velocity.set(0,0,0);
     }
@@ -364,7 +381,7 @@ var getFrameDuration = (function() {
 
 function render() {
     observer.move(getFrameDuration());
-    if (shader.parameters.observer_motion) updateCamera();
+    if (shader.parameters.observer.motion) updateCamera();
     updateUniforms();
     renderer.render( scene, camera );
 }

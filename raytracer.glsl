@@ -160,7 +160,7 @@ vec4 planet_intersection(vec3 old_pos, vec3 ray, float t, float dt, vec3 planet_
 
 void main() {
 
-    {{#planet}}
+    {{#planetEnabled}}
     // "constants" derived from uniforms
     PLANET_RADIUS = planet_radius;
     PLANET_DISTANCE = max(planet_distance,planet_radius+1.5);
@@ -168,7 +168,7 @@ void main() {
     float MAX_PLANET_ROT = max((1.0 - PLANET_ORBITAL_ANG_VEL*PLANET_DISTANCE) / PLANET_RADIUS,0.0);
     PLANET_ROTATION_ANG_VEL = -PLANET_ORBITAL_ANG_VEL - MAX_PLANET_ROT * 0.5;
     PLANET_GAMMA = 1.0/sqrt(1.0-SQ(PLANET_ORBITAL_ANG_VEL*PLANET_DISTANCE));
-    {{/planet}}
+    {{/planetEnabled}}
 
     vec2 p = -1.0 + 2.0 * gl_FragCoord.xy / resolution.xy;
     p.y *= resolution.y / resolution.x;
@@ -176,18 +176,18 @@ void main() {
     vec3 pos = cam_pos;
     vec3 ray = normalize(p.x*cam_x + p.y*cam_y + FOV_MULT*cam_z);
 
-    {{#relativistic_abberation}}
+    {{#abberation}}
     ray = lorentz_velocity_transformation(ray, -cam_vel);
-    {{/relativistic_abberation}}
+    {{/abberation}}
 
     float ray_intensity = 1.0;
     float ray_doppler_factor = 1.0;
 
     float gamma = 1.0/sqrt(1.0-dot(cam_vel,cam_vel));
     ray_doppler_factor = gamma*(1.0 + dot(ray,cam_vel));
-    {{#relativistic_beaming}}
+    {{#beaming}}
     ray_intensity /= ray_doppler_factor*ray_doppler_factor*ray_doppler_factor;
-    {{/relativistic_beaming}}
+    {{/beaming}}
 
     float step = 0.01;
     vec4 color = vec4(0.0,0.0,0.0,1.0);
@@ -263,7 +263,7 @@ void main() {
         {{/gravitational_time_dilation}}
         {{/light_travel_time}}
 
-        {{#planet}}
+        {{#planetEnabled}}
         if (
             (
                 old_pos.z * pos.z < 0.0 ||
@@ -285,7 +285,7 @@ void main() {
                 color += planet_isec;
             }
         }
-        {{/planet}}
+        {{/planetEnabled}}
 
         {{#accretion_disk}}
         if (old_pos.z * pos.z < 0.0) {
@@ -304,14 +304,15 @@ void main() {
                     );
 
                     float accretion_intensity = ACCRETION_BRIGHTNESS;
+                    //accretion_intensity *= 1.0 / abs(ray.z/ray_l);
                     float temperature_coord = ACCRETION_TEMPERATURE/SPECRUM_TEX_TEMPERATURE_RANGE;
 
                     vec3 accretion_v = -vec3(-isec.y, isec.x, 0.0) / sqrt(2.0*(r-1.0)) / (r*r);
                     gamma = 1.0/sqrt(1.0-dot(accretion_v,accretion_v));
                     float doppler_factor = gamma*(1.0+dot(ray/ray_l,accretion_v));
-                    {{#relativistic_beaming}}
+                    {{#beaming}}
                     accretion_intensity /= doppler_factor*doppler_factor*doppler_factor;
-                    {{/relativistic_beaming}}
+                    {{/beaming}}
                     {{#doppler_shift}}
                     temperature_coord /= ray_doppler_factor*doppler_factor;
                     {{/doppler_shift}}
