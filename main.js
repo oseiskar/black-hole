@@ -13,6 +13,7 @@ function Observer() {
 }
 
 Observer.prototype.orbitalFrame = function() {
+    // the observer is orbiting a circle in the negative direction
     var orbital_y = observer.velocity.clone().normalize();
     var orbital_z = (new THREE.Vector3())
         .crossVectors(orbital_y, observer.position).normalize();
@@ -43,7 +44,7 @@ Observer.prototype.move = function(dt) {
         var s = Math.sin(angle), c = Math.cos(angle);
 
         this.position.set(c*r, s*r, 0);
-        this.velocity.set(-s*v, c*v, 0);
+        this.velocity.set(s*v, -c*v, 0);
 
         var alpha = degToRad(shader.parameters.observer.orbital_inclination);
         var orbit_coords = (new THREE.Matrix4()).makeRotationY(alpha);
@@ -85,7 +86,7 @@ function Shader(mustacheTemplate) {
         observer: {
             motion: true,
             distance: 11.0,
-            orbital_inclination: 10
+            orbital_inclination: -10
         },
 
         planetEnabled: function() {
@@ -297,7 +298,7 @@ function onWindowResize( event ) {
 
 function initializeCamera(camera) {
 
-    var pitchAngle = 10.0, yawAngle = 100.0;
+    var pitchAngle = 10.0, yawAngle = 60.0;
 
     // there are nicely named methods such as "lookAt" in the camera object
     // but there do not do a thing to the projection matrix due to an internal

@@ -20,9 +20,9 @@ THREE.Matrix4.prototype.linearPart = function() {
     var m = new THREE.Matrix3();
     var te = this.elements;
     m.set(
-        te[0], te[1], te[2],
-        te[4], te[5], te[6],
-        te[8], te[9], te[10]
+        te[0], te[4], te[8],
+        te[1], te[5], te[9],
+        te[2], te[6], te[10]
     );
     return m;
 };
