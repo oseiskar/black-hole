@@ -13,11 +13,16 @@ function Observer() {
 }
 
 Observer.prototype.orbitalFrame = function() {
-    // the observer is orbiting a circle in the negative direction
-    var orbital_y = observer.velocity.clone().normalize();
+
+    //var orbital_y = observer.velocity.clone().normalize();
+    var orbital_y = (new THREE.Vector3())
+        .subVectors(observer.velocity.clone().normalize().multiplyScalar(4.0),
+            observer.position).normalize();
+
     var orbital_z = (new THREE.Vector3())
-        .crossVectors(orbital_y, observer.position).normalize();
+        .crossVectors(observer.position, orbital_y).normalize();
     var orbital_x = (new THREE.Vector3()).crossVectors(orbital_y, orbital_z);
+
 
     return (new THREE.Matrix4()).makeBasis(
         orbital_x,
@@ -39,12 +44,12 @@ Observer.prototype.move = function(dt) {
         r = shader.parameters.observer.distance;
         v =  1.0 / Math.sqrt(2.0*(r-1.0));
         var ang_vel = v / r;
-        var angle = -this.time * ang_vel;
+        var angle = this.time * ang_vel;
 
         var s = Math.sin(angle), c = Math.cos(angle);
 
         this.position.set(c*r, s*r, 0);
-        this.velocity.set(s*v, -c*v, 0);
+        this.velocity.set(-s*v, c*v, 0);
 
         var alpha = degToRad(shader.parameters.observer.orbital_inclination);
         var orbit_coords = (new THREE.Matrix4()).makeRotationY(alpha);
@@ -298,7 +303,7 @@ function onWindowResize( event ) {
 
 function initializeCamera(camera) {
 
-    var pitchAngle = 10.0, yawAngle = 60.0;
+    var pitchAngle = 0.0, yawAngle = 0.0;
 
     // there are nicely named methods such as "lookAt" in the camera object
     // but there do not do a thing to the projection matrix due to an internal

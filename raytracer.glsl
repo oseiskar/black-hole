@@ -99,7 +99,7 @@ vec4 planet_intersection(vec3 old_pos, vec3 ray, float t, float dt, vec3 planet_
     ray = ray/dt;
 
     {{#lorentz_contraction}}
-    vec3 planet_dir = vec3(-planet_pos0.y, planet_pos0.x, 0.0) / PLANET_DISTANCE;
+    vec3 planet_dir = vec3(planet_pos0.y, -planet_pos0.x, 0.0) / PLANET_DISTANCE;
     {{/lorentz_contraction}}
 
     {{#light_travel_time}}
@@ -221,9 +221,9 @@ void main() {
     // "constants" derived from uniforms
     PLANET_RADIUS = planet_radius;
     PLANET_DISTANCE = max(planet_distance,planet_radius+1.5);
-    PLANET_ORBITAL_ANG_VEL = 1.0 / sqrt(2.0*(PLANET_DISTANCE-1.0)) / PLANET_DISTANCE;
-    float MAX_PLANET_ROT = max((1.0 - PLANET_ORBITAL_ANG_VEL*PLANET_DISTANCE) / PLANET_RADIUS,0.0);
-    PLANET_ROTATION_ANG_VEL = -PLANET_ORBITAL_ANG_VEL - MAX_PLANET_ROT * 0.5;
+    PLANET_ORBITAL_ANG_VEL = -1.0 / sqrt(2.0*(PLANET_DISTANCE-1.0)) / PLANET_DISTANCE;
+    float MAX_PLANET_ROT = max((1.0 + PLANET_ORBITAL_ANG_VEL*PLANET_DISTANCE) / PLANET_RADIUS,0.0);
+    PLANET_ROTATION_ANG_VEL = PLANET_ORBITAL_ANG_VEL + MAX_PLANET_ROT * 0.5;
     PLANET_GAMMA = 1.0/sqrt(1.0-SQ(PLANET_ORBITAL_ANG_VEL*PLANET_DISTANCE));
     {{/planetEnabled}}
 
@@ -367,7 +367,7 @@ void main() {
                     //accretion_intensity *= 1.0 / abs(ray.z/ray_l);
                     float temperature_coord = ACCRETION_TEMPERATURE/SPECTRUM_TEX_TEMPERATURE_RANGE;
 
-                    vec3 accretion_v = -vec3(-isec.y, isec.x, 0.0) / sqrt(2.0*(r-1.0)) / (r*r);
+                    vec3 accretion_v = vec3(-isec.y, isec.x, 0.0) / sqrt(2.0*(r-1.0)) / (r*r);
                     gamma = 1.0/sqrt(1.0-dot(accretion_v,accretion_v));
                     float doppler_factor = gamma*(1.0+dot(ray/ray_l,accretion_v));
                     {{#beaming}}
