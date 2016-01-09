@@ -30,15 +30,18 @@ const float ACCRETION_TEMPERATURE = 4000.0;
 
 // black-body texture metadata
 const float SPECTRUM_TEX_TEMPERATURE_RANGE = 65504.0;
+const float SPECTRUM_TEX_WAVELENGTH_RANGE = 2048.0;
 const float SPECTRUM_TEX_RATIO_RANGE = 6.48053329012;
+
 const float BLACK_BODY_TEXTURE_COORD = 1.0;
+const float SINGLE_WAVELENGTH_TEXTURE_COORD = 0.5;
 const float RATIO_TEXTURE_COORD = 0.0;
 
 const float STAR_MIN_TEMPERATURE = 4000.0;
 const float STAR_MAX_TEMPERATURE = 15000.0;
 
 const float STAR_BRIGHTNESS = 1.0;
-const float GALAXY_BRIGHTNESS = 0.3;
+const float GALAXY_BRIGHTNESS = 0.4;
 
 //const vec4 PLANET_COLOR = vec4(0.3, 0.5, 0.8, 1.0);
 const float PLANET_AMBIENT = 0.1;
@@ -173,28 +176,40 @@ vec4 galaxy_color(vec2 tex_coord, float doppler_factor) {
 
     {{#observerMotion}}
     vec4 ret = vec4(0.0,0.0,0.0,0.0);
+    float red = max(0.0, color.r - color.g);
+
+    const float H_ALPHA_RATIO = 0.1;
+    const float TEMPERATURE_BIAS = 0.95;
+
+    color.r -= red*H_ALPHA_RATIO;
 
     float i1 = max(color.r, max(color.g, color.b));
     float ratio = (color.g+color.b) / color.r;
 
-    if (i1 <= 0.0 || color.r <= 0.0) return ret;
+    if (i1 > 0.0 && color.r > 0.0) {
 
-    float t_coord = texture2D(spectrum_texture, vec2(
-        ratio / SPECTRUM_TEX_RATIO_RANGE,
-        RATIO_TEXTURE_COORD)).r;
+        float t_coord = texture2D(spectrum_texture, vec2(
+            ratio / SPECTRUM_TEX_RATIO_RANGE,
+            RATIO_TEXTURE_COORD)).r * TEMPERATURE_BIAS;
 
-    color = texture2D(spectrum_texture, vec2(
-        t_coord,
-        BLACK_BODY_TEXTURE_COORD));
+        color = texture2D(spectrum_texture, vec2(
+            t_coord,
+            BLACK_BODY_TEXTURE_COORD));
 
-    float i0 = max(color.r, max(color.g, color.b));
-    if (i0 <= 0.0) return ret;
+        float i0 = max(color.r, max(color.g, color.b));
+        if (i0 > 0.0) {
+            t_coord /= doppler_factor;
 
-    t_coord /= doppler_factor;
+            ret = texture2D(spectrum_texture, vec2(
+                t_coord,
+                BLACK_BODY_TEXTURE_COORD)) * max(i1/i0,0.0);
 
-    ret = texture2D(spectrum_texture, vec2(
-        t_coord,
-        BLACK_BODY_TEXTURE_COORD)) * max(i1/i0,0.0);
+        }
+    }
+
+    ret += texture2D(spectrum_texture, vec2(
+        656.28 / SPECTRUM_TEX_WAVELENGTH_RANGE * doppler_factor,
+        SINGLE_WAVELENGTH_TEXTURE_COORD)) * red / 0.214 * H_ALPHA_RATIO;
 
     return ret;
     {{/observerMotion}}
