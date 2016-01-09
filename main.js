@@ -90,6 +90,10 @@ function Shader(mustacheTemplate) {
 
         planetEnabled: function() {
             return this.planet.enabled;
+        },
+
+        observerMotion: function() {
+            return this.observer.motion;
         }
     };
     var that = this;
@@ -258,7 +262,9 @@ function setupGUI() {
     gui.add(shader.parameters, 'accretion_disk').onChange(updateShader);
 
     var folder = gui.addFolder('Observer');
-    folder.add(shader.parameters.observer, 'motion').onChange(updateCamera);
+    folder.add(shader.parameters.observer, 'motion').onChange(function() {
+        updateCamera(); updateShader();
+    });
     folder.add(shader.parameters.observer, 'distance').min(1.5).max(30)
         .onChange(updateCamera);
     //folder.open();

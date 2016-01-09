@@ -38,7 +38,7 @@ const float STAR_MIN_TEMPERATURE = 4000.0;
 const float STAR_MAX_TEMPERATURE = 15000.0;
 
 const float STAR_BRIGHTNESS = 1.0;
-const float GALAXY_BRIGHTNESS = 0.5;
+const float GALAXY_BRIGHTNESS = 0.3;
 
 //const vec4 PLANET_COLOR = vec4(0.3, 0.5, 0.8, 1.0);
 const float PLANET_AMBIENT = 0.1;
@@ -166,8 +166,13 @@ vec4 planet_intersection(vec3 old_pos, vec3 ray, float t, float dt, vec3 planet_
 
 vec4 galaxy_color(vec2 tex_coord, float doppler_factor) {
 
-    vec4 ret = vec4(0.0,0.0,0.0,0.0);
     vec4 color = texture2D(galaxy_texture, tex_coord);
+    {{^observerMotion}}
+    return color;
+    {{/observerMotion}}
+
+    {{#observerMotion}}
+    vec4 ret = vec4(0.0,0.0,0.0,0.0);
 
     float i1 = max(color.r, max(color.g, color.b));
     float ratio = (color.g+color.b) / color.r;
@@ -189,9 +194,10 @@ vec4 galaxy_color(vec2 tex_coord, float doppler_factor) {
 
     ret = texture2D(spectrum_texture, vec2(
         t_coord,
-        BLACK_BODY_TEXTURE_COORD)) * max(i1/i0,0.0) * GALAXY_BRIGHTNESS;
+        BLACK_BODY_TEXTURE_COORD)) * max(i1/i0,0.0);
 
     return ret;
+    {{/observerMotion}}
 }
 
 void main() {
@@ -391,7 +397,7 @@ void main() {
                 BLACK_BODY_TEXTURE_COORD)) * star_color.r * STAR_BRIGHTNESS;
         }
 
-        color += galaxy_color(tex_coord, ray_doppler_factor);
+        color += galaxy_color(tex_coord, ray_doppler_factor) * GALAXY_BRIGHTNESS;
     }
 
     gl_FragColor = color*ray_intensity;
