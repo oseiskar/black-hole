@@ -28,8 +28,11 @@ const float ACCRETION_WIDTH = 5.0;
 const float ACCRETION_BRIGHTNESS = 0.7;
 const float ACCRETION_TEMPERATURE = 4000.0;
 
-const float SPECRUM_TEX_TEMPERATURE_RANGE = 65504.0;
+// black-body texture metadata
+const float SPECTRUM_TEX_TEMPERATURE_RANGE = 65504.0;
+const float SPECTRUM_TEX_RATIO_RANGE = 6.48053329012;
 const float BLACK_BODY_TEXTURE_COORD = 1.0;
+const float RATIO_TEXTURE_COORD = 0.0;
 
 const float STAR_MIN_TEMPERATURE = 4000.0;
 const float STAR_MAX_TEMPERATURE = 15000.0;
@@ -157,6 +160,36 @@ vec4 planet_intersection(vec3 old_pos, vec3 ray, float t, float dt, vec3 planet_
     ret = texture2D(planet_texture, tex_coord) * lightness;
     if (isec_t < 0.0) isec_t = 0.5;
     ret.w = isec_t;
+
+    return ret;
+}
+
+vec4 galaxy_color(vec2 tex_coord, float doppler_factor) {
+
+    vec4 ret = vec4(0.0,0.0,0.0,0.0);
+    vec4 color = texture2D(galaxy_texture, tex_coord);
+
+    float i1 = max(color.r, max(color.g, color.b));
+    float ratio = (color.g+color.b) / color.r;
+
+    if (i1 <= 0.0 || color.r <= 0.0) return ret;
+
+    float t_coord = texture2D(spectrum_texture, vec2(
+        ratio / SPECTRUM_TEX_RATIO_RANGE,
+        RATIO_TEXTURE_COORD)).r;
+
+    color = texture2D(spectrum_texture, vec2(
+        t_coord,
+        BLACK_BODY_TEXTURE_COORD));
+
+    float i0 = max(color.r, max(color.g, color.b));
+    if (i0 <= 0.0) return ret;
+
+    t_coord /= doppler_factor;
+
+    ret = texture2D(spectrum_texture, vec2(
+        t_coord,
+        BLACK_BODY_TEXTURE_COORD)) * max(i1/i0,0.0) * GALAXY_BRIGHTNESS;
 
     return ret;
 }
@@ -311,7 +344,7 @@ void main() {
 
                     float accretion_intensity = ACCRETION_BRIGHTNESS;
                     //accretion_intensity *= 1.0 / abs(ray.z/ray_l);
-                    float temperature_coord = ACCRETION_TEMPERATURE/SPECRUM_TEX_TEMPERATURE_RANGE;
+                    float temperature_coord = ACCRETION_TEMPERATURE/SPECTRUM_TEX_TEMPERATURE_RANGE;
 
                     vec3 accretion_v = -vec3(-isec.y, isec.x, 0.0) / sqrt(2.0*(r-1.0)) / (r*r);
                     gamma = 1.0/sqrt(1.0-dot(accretion_v,accretion_v));
@@ -345,18 +378,20 @@ void main() {
     if (u < 1.0) {
         ray = normalize(pos - old_pos);
         vec2 tex_coord = sphere_map(ray * BG_COORDS);
+        float t_coord;
 
         vec4 star_color = texture2D(star_texture, tex_coord);
         if (star_color.r > 0.0) {
-            float t_coord = (STAR_MIN_TEMPERATURE +
+            t_coord = (STAR_MIN_TEMPERATURE +
                 (STAR_MAX_TEMPERATURE-STAR_MIN_TEMPERATURE) * star_color.g)
-                / SPECRUM_TEX_TEMPERATURE_RANGE / ray_doppler_factor;
+                / SPECTRUM_TEX_TEMPERATURE_RANGE / ray_doppler_factor;
 
             color += texture2D(spectrum_texture, vec2(
                 t_coord,
                 BLACK_BODY_TEXTURE_COORD)) * star_color.r * STAR_BRIGHTNESS;
         }
-        color += texture2D(galaxy_texture, tex_coord) * GALAXY_BRIGHTNESS;
+
+        color += galaxy_color(tex_coord, ray_doppler_factor);
     }
 
     gl_FragColor = color*ray_intensity;
