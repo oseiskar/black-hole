@@ -303,7 +303,7 @@ function onWindowResize( event ) {
 
 function initializeCamera(camera) {
 
-    var pitchAngle = 0.0, yawAngle = 0.0;
+    var pitchAngle = 3.0, yawAngle = 0.0;
 
     // there are nicely named methods such as "lookAt" in the camera object
     // but there do not do a thing to the projection matrix due to an internal
