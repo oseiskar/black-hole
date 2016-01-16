@@ -5,6 +5,22 @@
 
 #define ROT_Y(a) mat3(0, cos(a), sin(a), 1, 0, 0, 0, sin(a), -cos(a))
 
+
+// spectrum texture lookup helper macros
+const float BLACK_BODY_TEXTURE_COORD = 1.0;
+const float SINGLE_WAVELENGTH_TEXTURE_COORD = 0.5;
+const float TEMPERATURE_LOOKUP_RATIO_TEXTURE_COORD = 0.0;
+
+// black-body texture metadata
+const float SPECTRUM_TEX_TEMPERATURE_RANGE = 65504.0;
+const float SPECTRUM_TEX_WAVELENGTH_RANGE = 2048.0;
+const float SPECTRUM_TEX_RATIO_RANGE = 6.48053329012;
+
+// multi-line macros don't seem to work in WebGL :(
+#define BLACK_BODY_COLOR(t) texture2D(spectrum_texture, vec2((t) / SPECTRUM_TEX_TEMPERATURE_RANGE, BLACK_BODY_TEXTURE_COORD))
+#define SINGLE_WAVELENGTH_COLOR(lambda) texture2D(spectrum_texture, vec2((lambda) / SPECTRUM_TEX_WAVELENGTH_RANGE, SINGLE_WAVELENGTH_TEXTURE_COORD))
+#define TEMPERATURE_LOOKUP(ratio) (texture2D(spectrum_texture, vec2((ratio) / SPECTRUM_TEX_RATIO_RANGE, TEMPERATURE_LOOKUP_RATIO_TEXTURE_COORD)).r * SPECTRUM_TEX_TEMPERATURE_RANGE)
+
 uniform vec2 resolution;
 uniform float time;
 
@@ -27,15 +43,6 @@ const float ACCRETION_MIN_R = 1.5;
 const float ACCRETION_WIDTH = 5.0;
 const float ACCRETION_BRIGHTNESS = 0.7;
 const float ACCRETION_TEMPERATURE = 4000.0;
-
-// black-body texture metadata
-const float SPECTRUM_TEX_TEMPERATURE_RANGE = 65504.0;
-const float SPECTRUM_TEX_WAVELENGTH_RANGE = 2048.0;
-const float SPECTRUM_TEX_RATIO_RANGE = 6.48053329012;
-
-const float BLACK_BODY_TEXTURE_COORD = 1.0;
-const float SINGLE_WAVELENGTH_TEXTURE_COORD = 0.5;
-const float RATIO_TEXTURE_COORD = 0.0;
 
 const float STAR_MIN_TEMPERATURE = 4000.0;
 const float STAR_MAX_TEMPERATURE = 15000.0;
@@ -188,28 +195,17 @@ vec4 galaxy_color(vec2 tex_coord, float doppler_factor) {
 
     if (i1 > 0.0 && color.r > 0.0) {
 
-        float t_coord = texture2D(spectrum_texture, vec2(
-            ratio / SPECTRUM_TEX_RATIO_RANGE,
-            RATIO_TEXTURE_COORD)).r * TEMPERATURE_BIAS;
-
-        color = texture2D(spectrum_texture, vec2(
-            t_coord,
-            BLACK_BODY_TEXTURE_COORD));
+        float temperature = TEMPERATURE_LOOKUP(ratio) * TEMPERATURE_BIAS;
+        color = BLACK_BODY_COLOR(temperature);
 
         float i0 = max(color.r, max(color.g, color.b));
         if (i0 > 0.0) {
-            t_coord /= doppler_factor;
-
-            ret = texture2D(spectrum_texture, vec2(
-                t_coord,
-                BLACK_BODY_TEXTURE_COORD)) * max(i1/i0,0.0);
-
+            temperature /= doppler_factor;
+            ret = BLACK_BODY_COLOR(temperature) * max(i1/i0,0.0);
         }
     }
 
-    ret += texture2D(spectrum_texture, vec2(
-        656.28 / SPECTRUM_TEX_WAVELENGTH_RANGE * doppler_factor,
-        SINGLE_WAVELENGTH_TEXTURE_COORD)) * red / 0.214 * H_ALPHA_RATIO;
+    ret += SINGLE_WAVELENGTH_COLOR(656.28 * doppler_factor) * red / 0.214 * H_ALPHA_RATIO;
 
     return ret;
     {{/observerMotion}}
@@ -358,7 +354,7 @@ void main() {
 
                     float accretion_intensity = ACCRETION_BRIGHTNESS;
                     //accretion_intensity *= 1.0 / abs(ray.z/ray_l);
-                    float temperature_coord = ACCRETION_TEMPERATURE/SPECTRUM_TEX_TEMPERATURE_RANGE;
+                    float temperature = ACCRETION_TEMPERATURE;
 
                     vec3 accretion_v = vec3(-isec.y, isec.x, 0.0) / sqrt(2.0*(r-1.0)) / (r*r);
                     gamma = 1.0/sqrt(1.0-dot(accretion_v,accretion_v));
@@ -367,14 +363,12 @@ void main() {
                     accretion_intensity /= doppler_factor*doppler_factor*doppler_factor;
                     {{/beaming}}
                     {{#doppler_shift}}
-                    temperature_coord /= ray_doppler_factor*doppler_factor;
+                    temperature /= ray_doppler_factor*doppler_factor;
                     {{/doppler_shift}}
 
                     color += texture2D(accretion_disk_texture,tex_coord)
                         * accretion_intensity
-                        * texture2D(spectrum_texture, vec2(
-                            temperature_coord,
-                            BLACK_BODY_TEXTURE_COORD));
+                        * BLACK_BODY_COLOR(temperature);
                 }
             }
         }
@@ -398,11 +392,9 @@ void main() {
         if (star_color.r > 0.0) {
             t_coord = (STAR_MIN_TEMPERATURE +
                 (STAR_MAX_TEMPERATURE-STAR_MIN_TEMPERATURE) * star_color.g)
-                / SPECTRUM_TEX_TEMPERATURE_RANGE / ray_doppler_factor;
+                 / ray_doppler_factor;
 
-            color += texture2D(spectrum_texture, vec2(
-                t_coord,
-                BLACK_BODY_TEXTURE_COORD)) * star_color.r * STAR_BRIGHTNESS;
+            color += BLACK_BODY_COLOR(t_coord) * star_color.r * STAR_BRIGHTNESS;
         }
 
         color += galaxy_color(tex_coord, ray_doppler_factor) * GALAXY_BRIGHTNESS;
