@@ -33,8 +33,9 @@ def trace_u(pos, ray, path):
         max_rel_u_change = (1-log(u))*10.0 / float(n_steps)
         
         step = theta_step
-        if du > 0 and abs(du) > abs(max_rel_u_change*u) / theta_step:
-            step = max_rel_u_change*u/du
+            
+        if u > 1/10.0 and abs(du) > abs(max_rel_u_change*u) / theta_step:
+            step = max_rel_u_change*u/abs(du)
         
         path[j,0:3] = pos
         path[j,3] = t
