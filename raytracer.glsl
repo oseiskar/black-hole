@@ -275,19 +275,10 @@ void main() {
 
         step = MAX_REVOLUTIONS * 2.0*M_PI / float(NSTEPS);
 
-        // adaptive step size
-        {{#light_travel_time}}
-        float max_rel_u_change = 0.5;
-
-        if (du > 0.0) {
-            {{#gravitational_time_dilation}}
-            max_rel_u_change = (1.0-log(u))*10.0 / float(NSTEPS);
-            {{/gravitational_time_dilation}}
-
-            if (abs(du) > abs(max_rel_u_change*u) / step)
-                step = max_rel_u_change*u/du;
-        }
-        {{/light_travel_time}}
+        // adaptive step size, some ad hoc formulas
+        float max_rel_u_change = (1.0-log(u))*10.0 / float(NSTEPS);
+        if (u > 1.0/10.0 && abs(du) > abs(max_rel_u_change*u) / step)
+            step = max_rel_u_change*u/abs(du);
 
         old_u = u;
 
