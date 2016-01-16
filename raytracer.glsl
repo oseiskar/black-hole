@@ -99,7 +99,8 @@ vec3 contract(vec3 x, vec3 d, float mult) {
     return (x-par*d) + d*par*mult;
 }
 
-vec4 planet_intersection(vec3 old_pos, vec3 ray, float t, float dt, vec3 planet_pos0) {
+vec4 planet_intersection(vec3 old_pos, vec3 ray, float t, float dt,
+        vec3 planet_pos0, float ray_doppler_factor) {
 
     vec4 ret = vec4(0,0,0,0);
     vec3 ray0 = ray;
@@ -167,7 +168,16 @@ vec4 planet_intersection(vec3 old_pos, vec3 ray, float t, float dt, vec3 planet_
     float diffuse = max(0.0, dot(surface_normal, -light_dir));
     float lightness = ((1.0-PLANET_AMBIENT)*diffuse + PLANET_AMBIENT);
 
-    ret = texture2D(planet_texture, tex_coord) * lightness;
+    float light_temperature = ACCRETION_TEMPERATURE;
+    {{#doppler_shift}}
+    float doppler_factor = SQ(PLANET_GAMMA) *
+        (1.0 + dot(planet_vel, light_dir)) *
+        (1.0 - dot(planet_vel, normalize(ray)));
+    light_temperature /= doppler_factor * ray_doppler_factor;
+    {{/doppler_shift}}
+
+    vec4 light_color = BLACK_BODY_COLOR(light_temperature);
+    ret = texture2D(planet_texture, tex_coord) * lightness * light_color;
     if (isec_t < 0.0) isec_t = 0.5;
     ret.w = isec_t;
 
@@ -327,7 +337,8 @@ void main() {
             vec3 planet_pos0 = vec3(cos(planet_ang0), sin(planet_ang0), 0)*PLANET_DISTANCE;
             {{/light_travel_time}}
 
-            vec4 planet_isec = planet_intersection(old_pos, ray, t, dt, planet_pos0);
+            vec4 planet_isec = planet_intersection(old_pos, ray, t, dt,
+                    planet_pos0, ray_doppler_factor);
             if (planet_isec.w > 0.0) {
                 solid_isec_t = planet_isec.w;
                 planet_isec.w = 1.0;
