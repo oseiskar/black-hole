@@ -254,6 +254,7 @@ void main() {
 
     // initial conditions
     float u = 1.0 / length(pos), old_u;
+    float u0 = u;
 
     vec3 normal_vec = normalize(pos);
     vec3 tangent_vec = normalize(cross(cross(normal_vec, ray), normal_vec));
@@ -277,7 +278,7 @@ void main() {
 
         // adaptive step size, some ad hoc formulas
         float max_rel_u_change = (1.0-log(u))*10.0 / float(NSTEPS);
-        if (u > 1.0/10.0 && abs(du) > abs(max_rel_u_change*u) / step)
+        if ((du > 0.0 || u0/u < 5.0) && abs(du) > abs(max_rel_u_change*u) / step)
             step = max_rel_u_change*u/abs(du);
 
         old_u = u;
