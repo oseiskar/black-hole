@@ -50,8 +50,8 @@ const float STAR_MAX_TEMPERATURE = 15000.0;
 const float STAR_BRIGHTNESS = 1.0;
 const float GALAXY_BRIGHTNESS = 0.4;
 
-//const vec4 PLANET_COLOR = vec4(0.3, 0.5, 0.8, 1.0);
 const float PLANET_AMBIENT = 0.1;
+const float PLANET_LIGHTNESS = 1.5;
 
 // background texture coordinate system
 mat3 BG_COORDS = ROT_Y(45.0 * DEG_TO_RAD);
@@ -106,9 +106,7 @@ vec4 planet_intersection(vec3 old_pos, vec3 ray, float t, float dt,
     vec3 ray0 = ray;
     ray = ray/dt;
 
-    {{#lorentz_contraction}}
     vec3 planet_dir = vec3(planet_pos0.y, -planet_pos0.x, 0.0) / PLANET_DISTANCE;
-    {{/lorentz_contraction}}
 
     {{#light_travel_time}}
     float planet_ang1 = (t-dt) * PLANET_ORBITAL_ANG_VEL;
@@ -117,6 +115,9 @@ vec4 planet_intersection(vec3 old_pos, vec3 ray, float t, float dt,
 
     // transform to moving planet coordinate system
     ray = ray - planet_vel;
+    {{/light_travel_time}}
+    {{^light_travel_time}}
+    vec3 planet_vel = planet_dir * PLANET_ORBITAL_ANG_VEL * PLANET_DISTANCE;
     {{/light_travel_time}}
 
     // ray-sphere intersection
@@ -157,16 +158,22 @@ vec4 planet_intersection(vec3 old_pos, vec3 ray, float t, float dt,
     rot_phase = rot_phase * PLANET_ROTATION_ANG_VEL*0.5/M_PI;
     light_dir = light_dir / PLANET_DISTANCE;
 
+    {{#light_travel_time}}
+    light_dir = light_dir - planet_vel;
+    {{/light_travel_time}}
+
     vec3 surface_normal = surface_point;
     {{#lorentz_contraction}}
-    surface_normal = normalize(contract(surface_point, planet_dir, 1.0/PLANET_GAMMA));
+    light_dir = contract(light_dir, planet_dir, PLANET_GAMMA);
     {{/lorentz_contraction}}
+    light_dir = normalize(light_dir);
 
     vec2 tex_coord = sphere_map(surface_point * PLANET_COORDS);
     tex_coord.x = mod(tex_coord.x + rot_phase, 1.0);
 
     float diffuse = max(0.0, dot(surface_normal, -light_dir));
-    float lightness = ((1.0-PLANET_AMBIENT)*diffuse + PLANET_AMBIENT);
+    float lightness = ((1.0-PLANET_AMBIENT)*diffuse + PLANET_AMBIENT) *
+        PLANET_LIGHTNESS;
 
     float light_temperature = ACCRETION_TEMPERATURE;
     {{#doppler_shift}}

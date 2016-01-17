@@ -30,17 +30,13 @@ ProceduralTextures = {
 
   beachBall: function() {
 
-      var colors = [
-        { r: 1, g: 0, b: 0 },
-        { r: 1, g: 1, b: 1 },
-        { r: 0, g: 0.5, b: 0 },
-        { r: 1, g: 1, b: 1 },
-        { r: 0, g: 0, b: 1 },
-        { r: 1, g: 1, b: 1 }
-      ];
+      var W = 8, H = 2;
 
-      var dt = renderDataTexture(colors.length, 1, function(x,y) {
-          return colors[Math.floor(x*colors.length)];
+      var dt = renderDataTexture(W, H, function(x,y) {
+          var ix = Math.floor(x*W), iy = Math.floor(y*H);
+          var s = 1;
+          if ((ix+iy) % 2 === 0) s = 0.5;
+          return { r: s, g: s, b: s };
       });
       dt.magFilter = THREE.NearestFilter;
       dt.minFilter = THREE.NearestFilter;
