@@ -1,3 +1,7 @@
+---
+title: three.js black hole
+---
+
 ### Ray-traced simulation of a black hole
 
 _see **[COPYRIGHT.md](https://github.com/oseiskar/black-hole/blob/master/COPYRIGHT.md)** for license and copyright info_
