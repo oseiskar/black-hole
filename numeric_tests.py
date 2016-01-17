@@ -21,6 +21,7 @@ def trace_u(pos, ray, path):
     tangent_vec = normalize(cross(cross(normal_vec, ray), normal_vec))
     
     du = -dot(ray,normal_vec) / dot(ray,tangent_vec) * u
+    du0 = du
     
     theta = 0
     t = 0
@@ -35,7 +36,7 @@ def trace_u(pos, ray, path):
         
         step = theta_step
             
-        if (du > 0 or (u0/u < 5.0)) and abs(du) > abs(max_rel_u_change*u) / theta_step:
+        if (du > 0 or (du0 < 0.0 and u0/u < 5.0)) and abs(du) > abs(max_rel_u_change*u) / theta_step:
             step = max_rel_u_change*u/abs(du)
         
         path[j,0:3] = pos
