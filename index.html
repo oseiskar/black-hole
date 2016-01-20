@@ -17,43 +17,76 @@
                 font-weight: bold;
             }
 
-            #info {
+            .info {
                 text-align: center;
 
                 position: absolute;
                 padding: 10px;
                 width: 100%;
                 text-align: center;
-                color: #fff;
+                color: #ffffff;
+            }
+
+            .link-bar {
+                position: absolute;
+                bottom: 10px;
+                width: 100%;
+                text-align: center;
             }
 
             #loader {
                 margin-top: 20%;
             }
 
-            .muted {
+            .disclaimer {
                 margin-top: 1em;
-
-                font-weight: normal;
                 color: gray;
+            }
+
+            .drag-to-rotate-text {
+                position: absolute;
+                /*right: 270px;*/
+                width: 100%;
+                top: 10px;
+                text-align: center;
+                font-weight: normal;
+                color: #cccccc;
             }
 
             a { color: white; }
 
+            .initially-hidden {
+                visibility: hidden;
+            }
+
+            @media screen and (max-width: 800px) {
+                .hidden-phone {
+                    visibility: hidden;
+                }
+            }
         </style>
     </head>
     <body>
-        <div id="info">
-            <a href="https://github.com/oseiskar/black-hole" target="_blank">Schwarzschild black hole</a>
-            <div class="muted">(Drag to rotate)</div>
-
+        <div class="drag-to-rotate-text hidden-phone initially-hidden">
+            Drag to rotate or toggle variables on the right ⟶
+        </div>
+        <div class="info ">
             <div id="loader">
                 Loading...
-                <div class="muted">
+                <div class="disclaimer">
                 This is a WebGL demo and very unlikely to work unless you run
                 a recent variant of Chrome or Firefox
                 </div>
             </div>
+
+        </div>
+
+        <div class="link-bar">
+            <a href="https://github.com/oseiskar/black-hole/blob/master/README.md" target="_blank">What is this?</a>
+            |
+            <a href="https://github.com/oseiskar/black-hole" target="_blank">Github</a>
+            |
+            <a href="https://github.com/oseiskar/black-hole/blob/master/COPYRIGHT.md" target="_blank">Copyright</a>
         </div>
 
         <script src="js-libs/jquery-2.1.4.min.js"></script>
