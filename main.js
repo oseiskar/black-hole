@@ -128,6 +128,7 @@ function degToRad(a) { return Math.PI * a / 180.0; }
     function whenLoaded() {
         init(textures);
         $('#loader').hide();
+        $('.initially-hidden').removeClass('initially-hidden');
         animate();
     }
 
@@ -242,6 +243,7 @@ function init(textures) {
     stats.domElement.style.position = 'absolute';
     stats.domElement.style.top = '0px';
     container.appendChild( stats.domElement );
+    $(stats.domElement).addClass('hidden-phone');
 
     // Orbit camera from three.js
     camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 80000 );
