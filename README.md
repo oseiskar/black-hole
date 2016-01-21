@@ -1,6 +1,3 @@
----
-title: three.js black hole
----
 
 # Ray-traced simulation of a black hole
 
