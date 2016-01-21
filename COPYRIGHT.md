@@ -6,7 +6,7 @@
  * [dat.GUI](http://code.google.com/p/dat-gui) (`js-libs/dat.gui.js`)  licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
  * Other JavaScript libraries in `js-libs/` are licensed under the [MIT license](https://tldrlegal.com/license/mit-license)
    - [jQuery](https://jquery.org)
-   - [three.js](https://threejs.org) + components `Detector.js`, `OrbitControls.js` and the moon texture `img/moon_1024.jpg`
+   - [three.js](https://threejs.org) + components `Detector.js` and `OrbitControls.js`
    - [stats.js](https://github.com/mrdoob/stats.js)
    - [mustache.js](https://github.com/janl/mustache.js)
    - [ShaderLoader.js](https://github.com/codecruzer/webgl-shader-loader-js)

@@ -9,7 +9,7 @@ In this simulation, the light ray paths are computed by integrating an ODE descr
 
 The simulation needs a decent GPU and recent variant of Chrome or Firefox to run smoothly. Frame rate can be increased by shrinking the browser window and/or reducing screen resolution.
 
-Example: runs 30+ fps at resolution 1920 x 992 in Chrome 48 on a Linux desktop with GeForce GTX 750 Ti
+Example: runs 30+ fps at resolution 1920 x 1080 in Chrome 48 on a Linux desktop with GeForce GTX 750 Ti
 
 ### Known artefacts
 
