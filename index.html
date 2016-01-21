@@ -5,66 +5,7 @@
         <title>three.js black hole</title>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-        <style>
-            body {
-                background-color: #000;
-                margin: 0px;
-                overflow: hidden;
-
-                color: #fff;
-                font-family: Monospace;
-                font-size: 13px;
-                font-weight: bold;
-            }
-
-            .info {
-                text-align: center;
-
-                position: absolute;
-                padding: 10px;
-                width: 100%;
-                text-align: center;
-                color: #ffffff;
-            }
-
-            .link-bar {
-                position: absolute;
-                bottom: 10px;
-                width: 100%;
-                text-align: center;
-            }
-
-            #loader {
-                margin-top: 20%;
-            }
-
-            .disclaimer {
-                margin-top: 1em;
-                color: gray;
-            }
-
-            .drag-to-rotate-text {
-                position: absolute;
-                /*right: 270px;*/
-                width: 100%;
-                top: 10px;
-                text-align: center;
-                font-weight: normal;
-                color: #cccccc;
-            }
-
-            a { color: white; }
-
-            .initially-hidden {
-                visibility: hidden;
-            }
-
-            @media screen and (max-width: 800px) {
-                .hidden-phone {
-                    visibility: hidden;
-                }
-            }
-        </style>
+        <link rel="stylesheet" href="style.css">
     </head>
     <body>
         <div class="drag-to-rotate-text hidden-phone initially-hidden">
@@ -83,7 +24,9 @@
 
         <div class="link-bar">
             <a href="README" target="_blank">What is this?</a>
+            |
             <a href="https://github.com/oseiskar/black-hole" target="_blank">Github</a>
+            |
             <a href="COPYRIGHT" target="_blank">Copyright</a>
         </div>
 
