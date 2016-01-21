@@ -1,5 +1,4 @@
 ---
-title: three.js black hole
 ---
 
 ### Copyright and license info
