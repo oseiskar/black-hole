@@ -10,6 +10,6 @@
    - [stats.js](https://github.com/mrdoob/stats.js)
    - [mustache.js](https://github.com/janl/mustache.js)
    - [ShaderLoader.js](https://github.com/codecruzer/webgl-shader-loader-js)
- * The Milky Way image `img/milkyway.jpg` is from [Stellarium](http://www.stellarium.org/wiki/index.php/Textures) and "based on Nick Risinger's [Photopic Sky Survey](http://skysurvey.org/) image under [CC-BY-NC. Details](http://creativecommons.org/licenses/by-nc/2.0/)."
+ * The Milky Way image `img/milkyway.jpg` is from [Stellarium](http://www.stellarium.org/wiki/index.php/Textures) and "based on Nick Risinger's [Photopic Sky Survey](http://skysurvey.org/) image under [CC-BY-NC 2.0](http://creativecommons.org/licenses/by-nc/2.0/)."
  * `index.html` also adapted from three.js
  * [Other material](https://github.com/oseiskar/black-hole) (C) Otto Seiskari, 2015
