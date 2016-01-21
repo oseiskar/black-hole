@@ -1,7 +1,7 @@
 ---
 ---
 
-### Copyright and license info
+# Copyright and license info
 
  * [dat.GUI](http://code.google.com/p/dat-gui) (`js-libs/dat.gui.js`)  licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
  * Other JavaScript libraries in `js-libs/` are licensed under the [MIT license](https://tldrlegal.com/license/mit-license)
