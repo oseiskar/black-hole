@@ -75,6 +75,8 @@ var observer = new Observer();
 function Shader(mustacheTemplate) {
     // Compile-time shader parameters
     this.parameters = {
+        n_steps: 100,
+        quality: 'medium',
         accretion_disk: true,
         planet: {
             enabled: true,
@@ -95,7 +97,7 @@ function Shader(mustacheTemplate) {
         },
 
         planetEnabled: function() {
-            return this.planet.enabled;
+            return this.planet.enabled && this.quality !== 'fast';
         },
 
         observerMotion: function() {
@@ -263,37 +265,69 @@ function init(textures) {
 
 function setupGUI() {
 
-    function updateShader() { scene.updateShader(); }
+    var hint = $('#hint-text');
+    var p = shader.parameters;
+
+    function updateShader() {
+        hint.hide();
+        scene.updateShader();
+    }
 
     var gui = new dat.GUI();
 
-    gui.add(shader.parameters, 'accretion_disk').onChange(updateShader);
+    gui.add(p, 'quality', ['fast', 'medium', 'high']).onChange(function (value) {
+        $('.planet-controls').show();
+        switch(value) {
+        case 'fast':
+            p.n_steps = 40;
+            $('.planet-controls').hide();
+            break;
+        case 'medium':
+            p.n_steps = 100;
+            break;
+        case 'high':
+            p.n_steps = 200;
+            break;
+        }
+
+        updateShader();
+    });
+    gui.add(p, 'accretion_disk').onChange(updateShader);
 
     var folder = gui.addFolder('Observer');
-    folder.add(shader.parameters.observer, 'motion').onChange(function() {
-        updateCamera(); updateShader();
+    folder.add(p.observer, 'motion').onChange(function(motion) {
+        updateCamera();
+        updateShader();
+        if (motion) {
+            hint.text('Moving observer; drag to rotate camera');
+        } else {
+            hint.text('Stationary observer; drag to orbit around');
+        }
+        hint.fadeIn();
     });
-    folder.add(shader.parameters.observer, 'distance').min(1.5).max(30)
-        .onChange(updateCamera);
-    //folder.open();
+    folder.add(p.observer, 'distance').min(1.5).max(30).onChange(updateCamera);
+    folder.open();
 
     folder = gui.addFolder('Planet');
-    folder.add(shader.parameters.planet, 'enabled').onChange(updateShader);
-    folder.add(shader.parameters.planet, 'distance').min(1.5).onChange(updateUniforms);
-    folder.add(shader.parameters.planet, 'radius').min(0.01).max(2.0).onChange(updateUniforms);
+    folder.add(p.planet, 'enabled').onChange(updateShader);
+    folder.add(p.planet, 'distance').min(1.5).onChange(updateUniforms);
+    folder.add(p.planet, 'radius').min(0.01).max(2.0).onChange(updateUniforms);
+    $(folder.domElement).addClass('planet-controls');
     //folder.open();
 
     folder = gui.addFolder('Relativistic effects');
-    folder.add(shader.parameters, 'abberation').onChange(updateShader);
-    folder.add(shader.parameters, 'beaming').onChange(updateShader);
-    folder.add(shader.parameters, 'doppler_shift').onChange(updateShader);
-    folder.add(shader.parameters, 'gravitational_time_dilation').onChange(updateShader);
-    folder.add(shader.parameters, 'lorentz_contraction').onChange(updateShader);
+    folder.add(p, 'abberation').onChange(updateShader);
+    folder.add(p, 'beaming').onChange(updateShader);
+    folder.add(p, 'doppler_shift').onChange(updateShader);
+    folder.add(p, 'gravitational_time_dilation').onChange(updateShader);
+    $(folder.add(p, 'lorentz_contraction').onChange(updateShader).domElement)
+        .parent().parent().addClass('planet-controls');
+
     folder.open();
 
     folder = gui.addFolder('Time');
-    folder.add(shader.parameters, 'light_travel_time').onChange(updateShader);
-    folder.add(shader.parameters, 'time_scale').min(0);
+    folder.add(p, 'light_travel_time').onChange(updateShader);
+    folder.add(p, 'time_scale').min(0);
     //folder.open();
 
 }
