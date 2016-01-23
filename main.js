@@ -263,19 +263,31 @@ function init(textures) {
 
 function setupGUI() {
 
-    function updateShader() { scene.updateShader(); }
+    var hint = $('#hint-text');
+
+    function updateShader() {
+        hint.hide();
+        scene.updateShader();
+    }
 
     var gui = new dat.GUI();
 
     gui.add(shader.parameters, 'accretion_disk').onChange(updateShader);
 
     var folder = gui.addFolder('Observer');
-    folder.add(shader.parameters.observer, 'motion').onChange(function() {
-        updateCamera(); updateShader();
+    folder.add(shader.parameters.observer, 'motion').onChange(function(motion) {
+        updateCamera();
+        updateShader();
+        if (motion) {
+            hint.text('Moving observer; drag to rotate camera');
+        } else {
+            hint.text('Stationary observer; drag to orbit around');
+        }
+        hint.fadeIn();
     });
     folder.add(shader.parameters.observer, 'distance').min(1.5).max(30)
         .onChange(updateCamera);
-    //folder.open();
+    folder.open();
 
     folder = gui.addFolder('Planet');
     folder.add(shader.parameters.planet, 'enabled').onChange(updateShader);

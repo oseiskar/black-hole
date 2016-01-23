@@ -35,7 +35,7 @@ body {
     color: gray;
 }
 
-.drag-to-rotate-text {
+#hint-text {
     position: absolute;
     /*right: 270px;*/
     width: 100%;
