@@ -36,7 +36,7 @@ uniform sampler2D galaxy_texture, star_texture,
     accretion_disk_texture, planet_texture, spectrum_texture;
 
 // stepping parameters
-const int NSTEPS = 200;
+const int NSTEPS = {{n_steps}};
 const float MAX_REVOLUTIONS = 2.0;
 
 const float ACCRETION_MIN_R = 1.5;
