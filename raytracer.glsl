@@ -41,8 +41,8 @@ const float MAX_REVOLUTIONS = 2.0;
 
 const float ACCRETION_MIN_R = 1.5;
 const float ACCRETION_WIDTH = 5.0;
-const float ACCRETION_BRIGHTNESS = 0.7;
-const float ACCRETION_TEMPERATURE = 4000.0;
+const float ACCRETION_BRIGHTNESS = 0.9;
+const float ACCRETION_TEMPERATURE = 3900.0;
 
 const float STAR_MIN_TEMPERATURE = 4000.0;
 const float STAR_MAX_TEMPERATURE = 15000.0;
