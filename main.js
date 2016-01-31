@@ -309,19 +309,31 @@ function setupGUI() {
     folder.open();
 
     folder = gui.addFolder('Planet');
-    folder.add(p.planet, 'enabled').onChange(updateShader);
+    folder.add(p.planet, 'enabled').onChange(function(enabled) {
+        updateShader();
+        var controls = $('.indirect-planet-controls').show();
+        if (enabled) controls.show();
+        else controls.hide();
+    });
     folder.add(p.planet, 'distance').min(1.5).onChange(updateUniforms);
     folder.add(p.planet, 'radius').min(0.01).max(2.0).onChange(updateUniforms);
     $(folder.domElement).addClass('planet-controls');
     //folder.open();
 
+    function setGuiRowClass(guiEl, klass) {
+        $(guiEl.domElement).parent().parent().addClass(klass);
+    }
+
     folder = gui.addFolder('Relativistic effects');
     folder.add(p, 'abberation').onChange(updateShader);
     folder.add(p, 'beaming').onChange(updateShader);
     folder.add(p, 'doppler_shift').onChange(updateShader);
-    folder.add(p, 'gravitational_time_dilation').onChange(updateShader);
-    $(folder.add(p, 'lorentz_contraction').onChange(updateShader).domElement)
-        .parent().parent().addClass('planet-controls');
+    setGuiRowClass(
+        folder.add(p, 'gravitational_time_dilation').onChange(updateShader),
+        'planet-controls indirect-planet-controls');
+    setGuiRowClass(
+        folder.add(p, 'lorentz_contraction').onChange(updateShader),
+        'planet-controls indirect-planet-controls');
 
     folder.open();
 
