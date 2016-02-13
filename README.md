@@ -15,7 +15,7 @@ Example: runs 30+ fps at resolution 1920 x 1080 in Chrome 48 on a Linux desktop 
 ### Known artefacts
 
  * The striped accretion disk and planet textures are (obviously?) fake and are included to help visualizing motion.
- * The spectrum used in modeling the doppler shift of the Milky Way background image is quite arbitrary (not based on real spectral data) and consequently the doppler-shifted background colors may be wrong.
+ * The spectrum used in modeling the Doppler shift of the Milky Way background image is quite arbitrary (not based on real spectral data) and consequently the Doppler-shifted background colors may be wrong.
  * The lighting model of the planet is based on a point-like light source and a quite unphysical ambient component.
  * In the "medium" quality mode, the planet deforms unphysically when it travels between the camera and the black hole.
  * The light paths bend a bit more than they should due to low ODE solver step counts (see [numeric tests](https://github.com/oseiskar/black-hole/blob/numeric-notebooks/numeric_tests.ipynb)), but this seems to happen in a systematic way so that the image looks very similar in comparison to a more accurate simulation.

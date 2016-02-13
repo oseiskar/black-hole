@@ -85,7 +85,7 @@ function Shader(mustacheTemplate) {
         },
         lorentz_contraction: true,
         gravitational_time_dilation: true,
-        abberation: true,
+        aberration: true,
         beaming: true,
         doppler_shift: true,
         light_travel_time: true,
@@ -325,7 +325,7 @@ function setupGUI() {
     }
 
     folder = gui.addFolder('Relativistic effects');
-    folder.add(p, 'abberation').onChange(updateShader);
+    folder.add(p, 'aberration').onChange(updateShader);
     folder.add(p, 'beaming').onChange(updateShader);
     folder.add(p, 'doppler_shift').onChange(updateShader);
     setGuiRowClass(

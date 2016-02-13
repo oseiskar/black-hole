@@ -246,9 +246,9 @@ void main() {
     vec3 pos = cam_pos;
     vec3 ray = normalize(p.x*cam_x + p.y*cam_y + FOV_MULT*cam_z);
 
-    {{#abberation}}
+    {{#aberration}}
     ray = lorentz_velocity_transformation(ray, cam_vel);
-    {{/abberation}}
+    {{/aberration}}
 
     float ray_intensity = 1.0;
     float ray_doppler_factor = 1.0;
