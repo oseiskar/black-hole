@@ -1,0 +1,1057 @@
+<!doctype html> 
+<html lang="en"> 
+<head>
+   <title>Physics of oseiskar.github.io/black-hole</title> 
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" /> 
+<meta name="generator" content="TeX4ht (http://www.cse.ohio-state.edu/~gurari/TeX4ht/)" /> 
+<meta name="originator" content="TeX4ht (http://www.cse.ohio-state.edu/~gurari/TeX4ht/)" /> 
+<!-- imgdir:images/,charset=utf-8,html,xhtml,mathml --> 
+<meta name="src" content="physics.tex" /> 
+<meta name="date" content="2016-02-20 15:02:00" /> 
+<link rel="stylesheet" type="text/css" href="physics.css" /> 
+<meta charset="UTF-8" /> 
+<meta name="generator" content="TeX4ht (http://www.cse.ohio-state.edu/~gurari/TeX4ht/)" /> 
+<script type="text/x-mathjax-config">MathJax.Hub.Config({ TeX: { extensions: ["autobold.js"] }});</script> 
+<script type="text/javascript" 
+src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML" 
+></script> 
+<link rel="stylesheet" type="text/css" href="physics-extras.css" /> 
+</head><body 
+>
+   <div class="maketitle">
+                                                                          
+
+                                                                          
+                                                                          
+
+                                                                          
+
+<h2 class="titleHead">Physics of
+<a 
+href="https://oseiskar.github.io/black-hole" >oseiskar.github.io/black-hole</a></h2>
+<div class="author" >Otto Seiskari</div><br />
+<div class="date" ></div>
+   </div>
+   <h3 class="likesectionHead"><a 
+ id="x1-1000"></a>Ray paths and gravitational lensing</h3>
+<p>As usual in raytracing, each sample (pixel) in the image corresponds to a path starting from
+the position <!--l. 30--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" ><msub><mrow 
+><mstyle mathvariant="bold"><mi 
+>p</mi></mstyle></mrow><mrow 
+><mn>0</mn></mrow></msub 
+> <mo 
+class="MathClass-rel">=</mo> <mrow ><mo 
+class="MathClass-open">(</mo><mrow><msub><mrow 
+><mi 
+>x</mi></mrow><mrow 
+><mn>0</mn></mrow></msub 
+><mo 
+class="MathClass-punc">,</mo><msub><mrow 
+><mi 
+>y</mi></mrow><mrow 
+><mn>0</mn></mrow></msub 
+><mo 
+class="MathClass-punc">,</mo><msub><mrow 
+><mi 
+>z</mi></mrow><mrow 
+><mn>0</mn></mrow></msub 
+></mrow><mo 
+class="MathClass-close">)</mo></mrow></math>
+of the camera, initially travelling to a direction
+<!--l. 30--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" ><msub><mrow 
+><mstyle mathvariant="bold"><mi 
+>d</mi></mstyle></mrow><mrow 
+><mn>0</mn></mrow></msub 
+> <mo 
+class="MathClass-rel">∈</mo> <msup><mrow 
+><mi 
+>ℝ</mi></mrow><mrow 
+><mn>3</mn></mrow></msup 
+></math>
+specified by the camera coordinate system. The path represents photons arriving
+to the camera from that direction. Instead of traveling in straight lines until
+hitting an object, the paths solve the photonic geodesic equation in the
+Schwarzschild space-time, which in certain units and spherical coordinates
+<!--l. 31--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" ><mrow ><mo 
+class="MathClass-open">(</mo><mrow><mi 
+>t</mi><mo 
+class="MathClass-punc">,</mo><mi 
+>r</mi><mo 
+class="MathClass-punc">,</mo><mi 
+>𝜃</mi><mo 
+class="MathClass-punc">,</mo><mi 
+>ϕ</mi></mrow><mo 
+class="MathClass-close">)</mo></mrow></math> takes
+the form (cf. <span class="cite">[<a 
+href="#Xastro-princeton">1</a>, §4.2.1]</span>)
+                                                                          
+
+                                                                          
+<!--tex4ht:inline--></p> 
+<!--l. 32--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="block" >
+        <mstyle mathvariant="normal"><mi 
+>d</mi></mstyle><msup><mrow 
+><mi 
+>s</mi></mrow><mrow 
+><mn>2</mn></mrow></msup 
+> <mo 
+class="MathClass-rel">=</mo> <mfenced separators="" 
+open="("  close=")" ><mrow><mn>1</mn> <mo 
+class="MathClass-bin">−</mo><mfrac><mrow 
+><mn>1</mn></mrow> 
+<mrow 
+><mi 
+>r</mi></mrow></mfrac></mrow></mfenced><mstyle mathvariant="normal"><mi 
+>d</mi></mstyle><msup><mrow 
+><mi 
+>t</mi></mrow><mrow 
+><mn>2</mn></mrow></msup 
+> <mo 
+class="MathClass-bin">+</mo><msup><mrow 
+> <mfenced separators="" 
+open="("  close=")" ><mrow><mn>1</mn> <mo 
+class="MathClass-bin">−</mo><mfrac><mrow 
+><mn>1</mn></mrow> 
+<mrow 
+><mi 
+>r</mi></mrow></mfrac></mrow></mfenced></mrow><mrow 
+><mo 
+class="MathClass-bin">−</mo><mn>1</mn></mrow></msup 
+><mstyle mathvariant="normal"><mi 
+>d</mi></mstyle><msup><mrow 
+><mi 
+>r</mi></mrow><mrow 
+><mn>2</mn></mrow></msup 
+> <mo 
+class="MathClass-bin">−</mo> <msup><mrow 
+><mi 
+>r</mi></mrow><mrow 
+><mn>2</mn></mrow></msup 
+><mrow ><mo 
+class="MathClass-open">(</mo><mrow><mstyle mathvariant="normal"><mi 
+>d</mi></mstyle><msup><mrow 
+><mi 
+>𝜃</mi></mrow><mrow 
+><mn>2</mn></mrow></msup 
+> <mo 
+class="MathClass-bin">−</mo><msup><mrow 
+><mo class="qopname"> sin</mo><!--nolimits--> </mrow><mrow 
+><mn>2</mn></mrow></msup 
+><mi 
+>𝜃</mi> <mo 
+class="MathClass-bin">⋅</mo><mstyle mathvariant="normal"><mi 
+>d</mi></mstyle><msup><mrow 
+><mi 
+>ϕ</mi></mrow><mrow 
+><mn>2</mn></mrow></msup 
+></mrow><mo 
+class="MathClass-close">)</mo></mrow> <mo 
+class="MathClass-rel">=</mo> <mn>0</mn><mo 
+class="MathClass-punc">.</mo>
+</math>
+<p>
+</p> 
+<p>   Without loss of generality, one can fix
+<!--l. 37--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" ><mi 
+>𝜃</mi> <mo 
+class="MathClass-rel">=</mo> <mfrac><mrow 
+><mi 
+>π</mi></mrow> 
+<mrow 
+><mn>2</mn></mrow></mfrac> </math> and,
+even though not very obviously (see, e.g., <span class="cite">[<a 
+href="#Xwikipedia:sch">3</a>]</span> and <span class="cite">[<a 
+href="#Xantonell">2</a>]</span>), this gives the ordinary
+differential equation </p> 
+<table class="equation"><tr><td> <a 
+ id="x1-1001r1"></a>
+<!--l. 38--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="block" class="equation">
+                        <msup><mrow 
+><mi 
+>u</mi></mrow><mrow 
+><mo 
+class="MathClass-op">″</mo></mrow></msup 
+><mrow ><mo 
+class="MathClass-open">(</mo><mrow><mi 
+>ϕ</mi></mrow><mo 
+class="MathClass-close">)</mo></mrow> <mo 
+class="MathClass-rel">=</mo> <mo 
+class="MathClass-bin">−</mo><mi 
+>u</mi><mrow ><mo 
+class="MathClass-open">(</mo><mrow><mi 
+>ϕ</mi></mrow><mo 
+class="MathClass-close">)</mo></mrow> <mfenced separators="" 
+open="("  close=")" ><mrow><mn>1</mn> <mo 
+class="MathClass-bin">−</mo><mfrac><mrow 
+><mn>3</mn></mrow> 
+<mrow 
+><mn>2</mn></mrow></mfrac><msup><mrow 
+><mi 
+>u</mi></mrow><mrow 
+><mn>2</mn></mrow></msup 
+><mrow ><mo 
+class="MathClass-open">(</mo><mrow><mi 
+>ϕ</mi></mrow><mo 
+class="MathClass-close">)</mo></mrow></mrow></mfenced> <mo 
+class="MathClass-punc">,</mo>
+</math></td><td class="eq-no">(1)</td></tr></table>
+<p>   for <!--l. 41--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" ><mi 
+>u</mi> <mo 
+class="MathClass-punc">:</mo><mo 
+class="MathClass-rel">=</mo> <mn>1</mn><mo 
+class="MathClass-bin">∕</mo><mi 
+>r</mi></math>.
+To solve it in the raytracer, I use the initial conditions
+<!--tex4ht:inline--></p> 
+<!--l. 48--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="block" >
+                    <mi 
+>u</mi><mrow ><mo 
+class="MathClass-open">(</mo><mrow><mn>0</mn></mrow><mo 
+class="MathClass-close">)</mo></mrow> <mo 
+class="MathClass-rel">=</mo>    <mfrac><mrow 
+><mn>1</mn></mrow> 
+<mrow 
+><mo 
+class="MathClass-rel">∥</mo><msub><mrow 
+><mstyle mathvariant="bold"><mi 
+>p</mi></mstyle></mrow><mrow 
+><mn>0</mn></mrow></msub 
+><mo 
+class="MathClass-rel">∥</mo></mrow></mfrac><mo 
+class="MathClass-punc">,</mo><mspace width="2em" class="qquad"/><mspace width="2em" class="qquad"/><msup><mrow 
+><mi 
+>u</mi></mrow><mrow 
+><mi 
+>′</mi></mrow></msup 
+><mrow ><mo 
+class="MathClass-open">(</mo><mrow><mn>0</mn></mrow><mo 
+class="MathClass-close">)</mo></mrow> <mo 
+class="MathClass-rel">=</mo> <mo 
+class="MathClass-bin">−</mo><mi 
+>u</mi><mrow ><mo 
+class="MathClass-open">(</mo><mrow><mn>0</mn></mrow><mo 
+class="MathClass-close">)</mo></mrow><mfrac><mrow 
+><msub><mrow 
+><mstyle mathvariant="bold"><mi 
+>d</mi></mstyle></mrow><mrow 
+><mn>0</mn></mrow></msub 
+> <mo 
+class="MathClass-bin">⋅</mo><mstyle mathvariant="bold"><mi 
+>n</mi></mstyle></mrow>
+<mrow 
+><msub><mrow 
+><mstyle mathvariant="bold"><mi 
+>d</mi></mstyle></mrow><mrow 
+><mn>0</mn></mrow></msub 
+> <mo 
+class="MathClass-bin">⋅</mo><mstyle mathvariant="bold"><mi 
+>t</mi></mstyle></mrow></mfrac> <mo 
+class="MathClass-punc">,</mo>
+</math>
+<p> where </p> 
+<table class="equation"><tr><td> <a 
+ id="x1-1002r2"></a>
+                                                                          
+
+                                                                          
+<!--l. 54--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="block" class="equation">
+                    <mstyle mathvariant="bold"><mi 
+>n</mi></mstyle> <mo 
+class="MathClass-rel">=</mo>   <mfrac><mrow 
+><msub><mrow 
+><mstyle mathvariant="bold"><mi 
+>p</mi></mstyle></mrow><mrow 
+><mn>0</mn></mrow></msub 
+></mrow> 
+<mrow 
+><mo 
+class="MathClass-rel">∥</mo><msub><mrow 
+><mstyle mathvariant="bold"><mi 
+>p</mi></mstyle></mrow><mrow 
+><mn>0</mn></mrow></msub 
+><mo 
+class="MathClass-rel">∥</mo></mrow></mfrac><mspace width="2em" class="qquad"/><mstyle 
+class="mbox"><mtext  > and </mtext></mstyle><mspace width="2em" class="qquad"/><mstyle mathvariant="bold"><mi 
+>t</mi></mstyle> <mo 
+class="MathClass-rel">=</mo>   <mfrac><mrow 
+><mrow ><mo 
+class="MathClass-open">(</mo><mrow><mstyle mathvariant="bold"><mi 
+>n</mi></mstyle> <mo 
+class="MathClass-bin">×</mo><msub><mrow 
+><mstyle mathvariant="bold"><mi 
+>d</mi></mstyle></mrow><mrow 
+><mn>0</mn></mrow></msub 
+></mrow><mo 
+class="MathClass-close">)</mo></mrow> <mo 
+class="MathClass-bin">×</mo><mstyle mathvariant="bold"><mi 
+>n</mi></mstyle></mrow> 
+<mrow 
+><mo 
+class="MathClass-rel">∥</mo><mrow ><mo 
+class="MathClass-open">(</mo><mrow><mstyle mathvariant="bold"><mi 
+>n</mi></mstyle> <mo 
+class="MathClass-bin">×</mo><msub><mrow 
+><mstyle mathvariant="bold"><mi 
+>d</mi></mstyle></mrow><mrow 
+><mn>0</mn></mrow></msub 
+></mrow><mo 
+class="MathClass-close">)</mo></mrow> <mo 
+class="MathClass-bin">×</mo><mstyle mathvariant="bold"><mi 
+>n</mi></mstyle><mo 
+class="MathClass-rel">∥</mo></mrow></mfrac><mo 
+class="MathClass-punc">.</mo>
+</math></td><td class="eq-no">(2)</td></tr></table>
+<p>   span the plane in which the ray travels.
+</p> 
+<p>   Equation (<a 
+href="#x1-1001r1">1<!--tex4ht:ref: u-ode --></a>) is integrated using the Leapfrog method until either a maximum number of
+steps <!--l. 61--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" ><mi 
+>N</mi></math> is reached or
+<!--l. 61--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" ><msub><mrow 
+><mi 
+>u</mi></mrow><mrow 
+><mi 
+>j</mi></mrow></msub 
+> <mo 
+class="MathClass-bin">+</mo> <mi 
+>Δ</mi><msub><mrow 
+><mi 
+>u</mi></mrow><mrow 
+><mi 
+>j</mi></mrow></msub 
+> <mo 
+class="MathClass-rel">&#x003C;</mo> <mn>0</mn></math>, which signals that the
+ray escapes at an angle <!--l. 61--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" ><mi 
+>ϕ</mi> <mo 
+class="MathClass-rel">∈</mo> <mrow ><mo 
+class="MathClass-open">(</mo><mrow><msub><mrow 
+><mi 
+>ϕ</mi></mrow><mrow 
+><mi 
+>j</mi></mrow></msub 
+><mo 
+class="MathClass-punc">,</mo><msub><mrow 
+><mi 
+>ϕ</mi></mrow><mrow 
+><mi 
+>j</mi></mrow></msub 
+> <mo 
+class="MathClass-bin">+</mo> <mi 
+>Δ</mi><msub><mrow 
+><mi 
+>ϕ</mi></mrow><mrow 
+><mi 
+>j</mi></mrow></msub 
+></mrow><mo 
+class="MathClass-close">)</mo></mrow></math>.
+Given <!--l. 62--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" ><mi 
+>ϕ</mi></math> and
+<!--l. 62--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" ><mi 
+>u</mi></math>, the corresponding
+spatial coordinates <!--l. 62--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" ><mstyle mathvariant="bold"><mi 
+>p</mi></mstyle> <mo 
+class="MathClass-rel">=</mo> <mrow ><mo 
+class="MathClass-open">(</mo><mrow><mi 
+>x</mi><mo 
+class="MathClass-punc">,</mo><mi 
+>y</mi><mo 
+class="MathClass-punc">,</mo><mi 
+>z</mi></mrow><mo 
+class="MathClass-close">)</mo></mrow></math>
+can be computed from (<a 
+href="#x1-1002r2">2<!--tex4ht:ref: n-and-t --></a>) as
+<!--tex4ht:inline--></p> 
+<!--l. 63--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="block" >
+                         <mstyle mathvariant="bold"><mi 
+>p</mi></mstyle> <mo 
+class="MathClass-rel">=</mo> <mfenced separators="" 
+open="("  close=")" ><mrow><mstyle mathvariant="bold"><mi 
+>n</mi></mstyle><mo class="qopname"> cos</mo><!--nolimits--> <mi 
+>ϕ</mi> <mo 
+class="MathClass-bin">+</mo> <mstyle mathvariant="bold"><mi 
+>t</mi></mstyle><mo class="qopname"> sin</mo><!--nolimits--> <mi 
+>ϕ</mi></mrow></mfenced><mo 
+class="MathClass-bin">∕</mo><mi 
+>u</mi><mo 
+class="MathClass-punc">.</mo>
+</math>
+<p> The Schwarzschild time coordinate <!--l. 66--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" ><mi 
+>t</mi></math>
+is resolved by amending the numerical integration with
+                                                                          
+
+                                                                          
+<!--tex4ht:inline--></p> 
+<!--l. 67--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="block" >
+                       <msup><mrow 
+><mi 
+>t</mi></mrow><mrow 
+><mi 
+>′</mi></mrow></msup 
+><mrow ><mo 
+class="MathClass-open">(</mo><mrow><mi 
+>ϕ</mi></mrow><mo 
+class="MathClass-close">)</mo></mrow> <mo 
+class="MathClass-rel">=</mo> <mo 
+class="MathClass-bin">−</mo><mfrac><mrow 
+><msqrt><mrow><msup><mrow 
+><mrow ><mo 
+class="MathClass-open">(</mo><mrow><msup><mrow 
+><mi 
+>u</mi></mrow><mrow 
+><mi 
+>′</mi> </mrow> </msup 
+> </mrow><mo 
+class="MathClass-close">)</mo></mrow></mrow><mrow 
+><mn>2</mn> </mrow> </msup 
+> <mo 
+class="MathClass-bin">+</mo> <msup><mrow 
+><mi 
+>u</mi></mrow><mrow 
+><mn>2</mn> </mrow> </msup 
+> <mrow ><mo 
+class="MathClass-open">(</mo><mrow><mn>1</mn> <mo 
+class="MathClass-bin">−</mo> <mi 
+>u</mi></mrow><mo 
+class="MathClass-close">)</mo></mrow></mrow></msqrt></mrow>
+      <mrow 
+><msup><mrow 
+><mi 
+>u</mi></mrow><mrow 
+><mn>2</mn></mrow></msup 
+><mrow ><mo 
+class="MathClass-open">(</mo><mrow><mn>1</mn> <mo 
+class="MathClass-bin">−</mo> <mi 
+>u</mi></mrow><mo 
+class="MathClass-close">)</mo></mrow></mrow></mfrac>       <mo 
+class="MathClass-punc">,</mo>
+</math>
+<p> which is needed to compute light travel times for simulating apparent positions of
+moving objects. In order to do the integration in a visually accurate way, the step
+size <!--l. 71--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" ><mi 
+>Δ</mi><msub><mrow 
+><mi 
+>ϕ</mi></mrow><mrow 
+><mi 
+>j</mi></mrow></msub 
+></math>
+is varied using an <i>ad hoc</i> formula, in addition to using the classical approximation
+<!--l. 72--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" ><mstyle mathvariant="normal"><mi 
+>d</mi></mstyle><msup><mrow 
+><mi 
+>t</mi></mrow><mrow 
+><mn>2</mn></mrow></msup 
+> <mo 
+class="MathClass-rel">≈</mo><mstyle mathvariant="normal"><mi 
+>d</mi></mstyle><msup><mrow 
+><mi 
+>x</mi></mrow><mrow 
+><mn>2</mn></mrow></msup 
+> <mo 
+class="MathClass-bin">+</mo> <mstyle mathvariant="normal"><mi 
+>d</mi></mstyle><msup><mrow 
+><mi 
+>y</mi></mrow><mrow 
+><mn>2</mn></mrow></msup 
+> <mo 
+class="MathClass-bin">+</mo> <mstyle mathvariant="normal"><mi 
+>d</mi></mstyle><msup><mrow 
+><mi 
+>z</mi></mrow><mrow 
+><mn>2</mn></mrow></msup 
+></math> at large
+distances <!--l. 72--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" ><mi 
+>r</mi></math>
+from the black hole.
+</p> 
+<p>   When the observer is moving with velocity
+<!--l. 74--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" ><mstyle mathvariant="bold"><mi 
+>v</mi></mstyle></math>
+w.r.t. the Schwarzschild coordinate system, the ray directions
+<!--l. 74--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" ><mstyle mathvariant="bold"><mi 
+>d</mi></mstyle></math> in
+the coordinate system of the observer (the camera coordinate system) are
+transformed by <i>relativistic aberration</i>, which is corresponds to the Lorentz
+velocity transformation
+<!--tex4ht:inline--></p> 
+<!--l. 75--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="block" ><msub><mrow 
+>
+                      <mstyle mathvariant="bold"><mi 
+>d</mi></mstyle></mrow><mrow 
+><mn>0</mn></mrow></msub 
+> <mo 
+class="MathClass-rel">=</mo>     <mfrac><mrow 
+><mn>1</mn></mrow> 
+<mrow 
+><mn>1</mn> <mo 
+class="MathClass-bin">+</mo> <mi 
+>v</mi><msub><mrow 
+><mi 
+>d</mi></mrow><mrow 
+><mo 
+class="MathClass-rel">∥</mo></mrow></msub 
+></mrow></mfrac> <mfenced separators="" 
+open="("  close=")" ><mrow><mrow ><mo 
+class="MathClass-open">(</mo><mrow><msub><mrow 
+><mi 
+>d</mi></mrow><mrow 
+><mo 
+class="MathClass-rel">∥</mo></mrow></msub 
+> <mo 
+class="MathClass-bin">+</mo> <mi 
+>v</mi></mrow><mo 
+class="MathClass-close">)</mo></mrow><msup><mrow 
+><mstyle mathvariant="bold"><mi 
+>v</mi></mstyle></mrow><mrow 
+><mn>0</mn></mrow></msup 
+> <mo 
+class="MathClass-bin">+</mo> <mfrac><mrow 
+><mn>1</mn></mrow> 
+<mrow 
+><mi 
+>γ</mi></mrow></mfrac><msub><mrow 
+><mstyle mathvariant="bold"><mi 
+>d</mi></mstyle></mrow><mrow 
+><mo 
+class="MathClass-rel">⊥</mo></mrow></msub 
+></mrow></mfenced>
+</math>
+<p> where <!--l. 78--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" ><mstyle mathvariant="bold"><mi 
+>v</mi></mstyle> <mo 
+class="MathClass-rel">=</mo><msup><mrow 
+> <mstyle mathvariant="bold"><mi 
+>v</mi></mstyle></mrow><mrow 
+><mn>0</mn></mrow></msup 
+><mi 
+>v</mi></math>,
+<!--l. 78--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" ><msub><mrow 
+><mi 
+>d</mi></mrow><mrow 
+><mo 
+class="MathClass-rel">∥</mo></mrow></msub 
+> <mo 
+class="MathClass-rel">=</mo><msup><mrow 
+> <mstyle mathvariant="bold"><mi 
+>v</mi></mstyle></mrow><mrow 
+><mn>0</mn></mrow></msup 
+> <mo 
+class="MathClass-bin">⋅</mo><mstyle mathvariant="bold"><mi 
+>d</mi></mstyle></math>,
+<!--l. 78--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" ><msub><mrow 
+><mstyle mathvariant="bold"><mi 
+>d</mi></mstyle></mrow><mrow 
+><mo 
+class="MathClass-rel">⊥</mo></mrow></msub 
+> <mo 
+class="MathClass-rel">=</mo> <mstyle mathvariant="bold"><mi 
+>d</mi></mstyle> <mo 
+class="MathClass-bin">−</mo><msub><mrow 
+><mstyle mathvariant="bold"><mi 
+>d</mi></mstyle></mrow><mrow 
+><mo 
+class="MathClass-rel">∥</mo></mrow></msub 
+></math> and </p> 
+<table class="equation"><tr><td>
+<a 
+ id="x1-1003r3"></a>
+                                                                          
+
+                                                                          
+<!--l. 79--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="block" class="equation">
+                               <mi 
+>γ</mi> <mo 
+class="MathClass-rel">=</mo>      <mfrac><mrow 
+><mn>1</mn></mrow> 
+<mrow 
+><msqrt><mrow><mn>1</mn> <mo 
+class="MathClass-bin">−</mo> <msup><mrow 
+><mi 
+>v</mi></mrow><mrow 
+><mn>2</mn></mrow></msup 
+></mrow></msqrt></mrow></mfrac><mo 
+class="MathClass-punc">.</mo>
+</math></td><td class="eq-no">(3)</td></tr></table>
+<p>
+   </p> 
+
+   <h3 class="likesectionHead"><a 
+ id="x1-2000"></a>Circular orbits</h3>
+<p>The observer (unless stationary) and the planet both move on circular orbits with
+angular velocities given by <span class="cite">[<a 
+href="#Xantonell">2</a>]</span> </p> 
+<table class="equation"><tr><td> <a 
+ id="x1-2001r4"></a>
+<!--l. 86--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="block" class="equation">
+                            <mfrac><mrow 
+><mstyle mathvariant="normal"><mi 
+>d</mi></mstyle><mi 
+>ϕ</mi></mrow>
+<mrow 
+><mstyle mathvariant="normal"><mi 
+>d</mi></mstyle><mi 
+>t</mi></mrow></mfrac> <mo 
+class="MathClass-rel">=</mo>        <mfrac><mrow 
+><mn>1</mn></mrow> 
+<mrow 
+><mi 
+>r</mi><msqrt><mrow><mn>2</mn><mrow ><mo 
+class="MathClass-open">(</mo><mrow><mi 
+>r</mi> <mo 
+class="MathClass-bin">−</mo> <mn>1</mn></mrow><mo 
+class="MathClass-close">)</mo></mrow></mrow></msqrt></mrow></mfrac><mo 
+class="MathClass-punc">.</mo>
+</math></td><td class="eq-no">(4)</td></tr></table>
+<p>   On such orbits, the time dilation of the observer relative to the planet is computed by updating
+the <!--l. 89--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" ><mi 
+>t</mi></math>-coordinate
+as
+<!--tex4ht:inline--></p> 
+<!--l. 90--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="block" >
+                          <mi 
+>Δ</mi><mi 
+>t</mi> <mo 
+class="MathClass-rel">=</mo> <msqrt><mrow><mfrac><mrow 
+><msup><mrow 
+><mrow ><mo 
+class="MathClass-open">(</mo><mrow><mi 
+>Δ</mi><msub><mrow 
+><mi 
+>t</mi></mrow><mrow 
+><mn>0</mn> </mrow> </msub 
+> </mrow><mo 
+class="MathClass-close">)</mo></mrow></mrow><mrow 
+><mn>2</mn> </mrow> </msup 
+> <mrow ><mo 
+class="MathClass-open">(</mo><mrow><mn>1</mn> <mo 
+class="MathClass-bin">−</mo> <msup><mrow 
+><mi 
+>v</mi></mrow><mrow 
+><mn>2</mn> </mrow> </msup 
+> </mrow><mo 
+class="MathClass-close">)</mo></mrow></mrow>
+      <mrow 
+><mn>1</mn> <mo 
+class="MathClass-bin">−</mo><mfrac><mrow 
+><mn>1</mn></mrow> 
+<mrow 
+><mi 
+>r</mi></mrow></mfrac></mrow></mfrac></mrow></msqrt>       <mo 
+class="MathClass-punc">,</mo>
+</math>
+                                                                          
+
+                                                                          
+<p> where <!--l. 93--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" ><mi 
+>Δ</mi><msub><mrow 
+><mi 
+>t</mi></mrow><mrow 
+><mn>0</mn></mrow></msub 
+></math>
+is the elapsed wall clock time between consecutive animation frames and
+<!--l. 93--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" ><mi 
+>v</mi> <mo 
+class="MathClass-rel">=</mo> <mi 
+>r</mi><mstyle mathvariant="normal"><mi 
+>d</mi></mstyle><mi 
+>ϕ</mi><mo 
+class="MathClass-bin">∕</mo><mstyle mathvariant="normal"><mi 
+>d</mi></mstyle><mi 
+>t</mi></math>.
+</p> 
+<p>   When computing intersection between the planet and light paths, the motion
+of the planet has to be taken into account. Within the ODE integration
+steps, a ray-sphere intersection model can be used after mapping the ray
+to the moving coordinate system of the planet using a Lorentz velocity
+transformation.
+</p> 
+<p>
+   </p> 
+
+   <h3 class="likesectionHead"><a 
+ id="x1-3000"></a>Doppler shift and beaming</h3>
+<p>The <i>Doppler factor</i> for light arriving to the observer from direction
+<!--l. 99--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" ><mstyle mathvariant="bold"><mi 
+>d</mi></mstyle></math>, emitted by a source
+moving at velocity <!--l. 99--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" ><mstyle mathvariant="bold"><mi 
+>v</mi></mstyle></math>
+is <span class="cite">[<a 
+href="#Xastro-princeton">1</a>, §1.7]</span> </p> 
+<table class="equation"><tr><td> <a 
+ id="x1-3001r5"></a>
+<!--l. 100--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="block" class="equation">
+                             <mi 
+>δ</mi> <mo 
+class="MathClass-rel">=</mo> <mi 
+>γ</mi><mrow ><mo 
+class="MathClass-open">(</mo><mrow><mn>1</mn> <mo 
+class="MathClass-bin">+</mo> <mstyle mathvariant="bold"><mi 
+>d</mi></mstyle> <mo 
+class="MathClass-bin">⋅</mo><mstyle mathvariant="bold"><mi 
+>v</mi></mstyle></mrow><mo 
+class="MathClass-close">)</mo></mrow><mo 
+class="MathClass-punc">,</mo>
+</math></td><td class="eq-no">(5)</td></tr></table>
+<p>   where <!--l. 103--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" ><mi 
+>γ</mi></math>
+is the Lorentz factor (<a 
+href="#x1-1003r3">3<!--tex4ht:ref: lorentz-factor --></a>). The Doppler factor for a ray path connecting a moving
+light source and a moving observer can be computed as
+                                                                          
+
+                                                                          
+<!--tex4ht:inline--></p> 
+<!--l. 105--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="block" >
+                 <mi 
+>δ</mi> <mo 
+class="MathClass-rel">=</mo> <msub><mrow 
+><mi 
+>δ</mi></mrow><mrow 
+><mi 
+>o</mi></mrow></msub 
+><msub><mrow 
+><mi 
+>δ</mi></mrow><mrow 
+><mi 
+>s</mi></mrow></msub 
+> <mo 
+class="MathClass-rel">=</mo> <msub><mrow 
+><mi 
+>γ</mi></mrow><mrow 
+><mi 
+>o</mi></mrow></msub 
+><msub><mrow 
+><mi 
+>γ</mi></mrow><mrow 
+><mi 
+>s</mi></mrow></msub 
+><mrow ><mo 
+class="MathClass-open">(</mo><mrow><mn>1</mn> <mo 
+class="MathClass-bin">−</mo><msub><mrow 
+><mstyle mathvariant="bold"><mi 
+>d</mi></mstyle></mrow><mrow 
+><mi 
+>o</mi></mrow></msub 
+> <mo 
+class="MathClass-bin">⋅</mo><msub><mrow 
+><mstyle mathvariant="bold"><mi 
+>v</mi></mstyle></mrow><mrow 
+><mi 
+>o</mi></mrow></msub 
+></mrow><mo 
+class="MathClass-close">)</mo></mrow><mrow ><mo 
+class="MathClass-open">(</mo><mrow><mn>1</mn> <mo 
+class="MathClass-bin">+</mo><msub><mrow 
+> <mstyle mathvariant="bold"><mi 
+>d</mi></mstyle></mrow><mrow 
+><mi 
+>s</mi></mrow></msub 
+> <mo 
+class="MathClass-bin">⋅</mo><msub><mrow 
+><mstyle mathvariant="bold"><mi 
+>v</mi></mstyle></mrow><mrow 
+><mi 
+>s</mi></mrow></msub 
+></mrow><mo 
+class="MathClass-close">)</mo></mrow><mo 
+class="MathClass-punc">,</mo>
+</math>
+<p> where <!--l. 108--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" ><msub><mrow 
+><mstyle mathvariant="bold"><mi 
+>d</mi></mstyle></mrow><mrow 
+><mi 
+>o</mi></mrow></msub 
+></math> and
+<!--l. 108--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" ><msub><mrow 
+><mstyle mathvariant="bold"><mi 
+>d</mi></mstyle></mrow><mrow 
+><mi 
+>s</mi></mrow></msub 
+></math> are the initial
+and final (at intersection with the light source) photon directions on the ray path. The
+velocities <!--l. 108--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" ><msub><mrow 
+><mstyle mathvariant="bold"><mi 
+>v</mi></mstyle></mrow><mrow 
+><mi 
+>o</mi></mrow></msub 
+></math>
+and <!--l. 108--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" ><msub><mrow 
+><mstyle mathvariant="bold"><mi 
+>v</mi></mstyle></mrow><mrow 
+><mi 
+>s</mi></mrow></msub 
+></math> of
+the observer and the source can be determined by (<a 
+href="#x1-2001r4">4<!--tex4ht:ref: circular-orbit-angular-velocity --></a>). All of these are given in the
+‘‘stationary&#x2019;&#x2019; Schwarzschild coordinate system. For the accretion disk, the velocity
+<!--l. 109--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" ><msub><mrow 
+><mstyle mathvariant="bold"><mi 
+>v</mi></mstyle></mrow><mrow 
+><mi 
+>s</mi></mrow></msub 
+></math> is
+computed assuming the disk consists of glowing matter moving in circular orbits
+given by (<a 
+href="#x1-2001r4">4<!--tex4ht:ref: circular-orbit-angular-velocity --></a>).
+</p> 
+<p>   The wavelengths of the emitted and observed light are related by
+<!--l. 111--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" ><msub><mrow 
+><mi 
+>λ</mi></mrow><mrow 
+><mi 
+>o</mi></mrow></msub 
+> <mo 
+class="MathClass-rel">=</mo> <mi 
+>δ</mi><msub><mrow 
+><mi 
+>λ</mi></mrow><mrow 
+><mi 
+>s</mi></mrow></msub 
+></math> and
+intensities by <!--l. 111--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" ><mi 
+>I</mi><mrow ><mo 
+class="MathClass-open">(</mo><mrow><msub><mrow 
+><mi 
+>λ</mi></mrow><mrow 
+><mi 
+>o</mi></mrow></msub 
+></mrow><mo 
+class="MathClass-close">)</mo></mrow> <mo 
+class="MathClass-rel">=</mo> <msup><mrow 
+><mi 
+>δ</mi></mrow><mrow 
+><mo 
+class="MathClass-bin">−</mo><mn>3</mn></mrow></msup 
+><mi 
+>I</mi><mrow ><mo 
+class="MathClass-open">(</mo><mrow><msub><mrow 
+><mi 
+>λ</mi></mrow><mrow 
+>
+<mi 
+>s</mi></mrow></msub 
+></mrow><mo 
+class="MathClass-close">)</mo></mrow></math>
+<span class="cite">[<a 
+href="#Xastro-princeton">1</a>]</span>. The change in intensity is called <i>relativistic beaming</i> and the change in
+wavelength is Doppler shift, which is also commonly referred to as <i>redshift</i> (when
+<!--l. 111--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" ><mi 
+>δ</mi> <mo 
+class="MathClass-rel">&#x003E;</mo> <mn>1</mn></math>) or
+<i>blueshift</i> (<!--l. 111--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" ><mi 
+>δ</mi> <mo 
+class="MathClass-rel">&#x003C;</mo> <mn>1</mn></math>).
+</p> 
+<p>   The perceived (RGB) colors corresponding to any fixed spectrum
+<!--l. 113--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" ><mi 
+>I</mi></math> can
+be precomputed in a one-dimensional lookup table (texture) as a function of the
+Doppler factor. This is done by integrating the shifted spectra with respect to the
+standard CIE color sensitivity measures <span class="cite">[<a 
+href="#Xcie:data">4</a>]</span>. The spectra used for the colors in this
+simulation are the black-body spectrum
+<!--tex4ht:inline--></p> 
+<!--l. 114--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="block" >
+                          <mi 
+>I</mi><mrow ><mo 
+class="MathClass-open">(</mo><mrow><mi 
+>λ</mi></mrow><mo 
+class="MathClass-close">)</mo></mrow> <mo 
+class="MathClass-rel">∝</mo><mfrac><mrow 
+><mn>2</mn><mi 
+>h</mi><msup><mrow 
+><mi 
+>c</mi></mrow><mrow 
+><mn>2</mn></mrow></msup 
+></mrow> 
+  <mrow 
+><msup><mrow 
+><mi 
+>λ</mi></mrow><mrow 
+><mn>5</mn></mrow></msup 
+></mrow></mfrac>          <mfrac><mrow 
+><mn>1</mn></mrow> 
+<mrow 
+><msup><mrow 
+><mi 
+>e</mi></mrow><mrow 
+>  <mfrac><mrow 
+><mi 
+>h</mi><mi 
+>c</mi></mrow>
+<mrow 
+><mi 
+>λ</mi><msub><mrow 
+><mi 
+>k</mi></mrow><mrow 
+><mi 
+>B</mi></mrow></msub 
+><mi 
+>T</mi></mrow></mfrac> </mrow></msup 
+> <mo 
+class="MathClass-bin">−</mo> <mn>1</mn></mrow></mfrac>
+</math>
+                                                                          
+
+                                                                          
+<p> and hydrogen-<!--l. 117--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" ><mi 
+>α</mi></math>:
+<!--l. 117--><math 
+ xmlns="http://www.w3.org/1998/Math/MathML"  
+display="inline" ><mi 
+>I</mi><mrow ><mo 
+class="MathClass-open">(</mo><mrow><mi 
+>λ</mi></mrow><mo 
+class="MathClass-close">)</mo></mrow> <mo 
+class="MathClass-rel">∝</mo> <msub><mrow 
+><mi 
+>δ</mi></mrow><mrow 
+><mn>6</mn><mn>5</mn><mn>6</mn><mo 
+class="MathClass-punc">.</mo><mn>2</mn><mn>8</mn><mn>1</mn><mstyle mathvariant="normal"><mi 
+>n</mi><mi 
+>m</mi></mstyle></mrow></msub 
+><mrow ><mo 
+class="MathClass-open">(</mo><mrow><mi 
+>λ</mi></mrow><mo 
+class="MathClass-close">)</mo></mrow></math>.
+                                                                          
+
+                                                                          
+   </p> 
+
+   <h3 class="likesectionHead"><a 
+ id="x1-4000"></a>References</h3>
+<p>
+   </p> 
+<div class="thebibliography">
+   <p class="bibitem" ><span class="biblabel">
+ [1]<span class="bibsp">   </span></span><a 
+ id="Xastro-princeton"></a>Jeremy     Goodman,     Topics     in     High-Energy     Astrophysics
+   <a 
+href="http://www.astro.princeton.edu/~jeremy/heap.pdf" class="url" >http://www.astro.princeton.edu/~jeremy/heap.pdf</a>
+   </p>
+   <p class="bibitem" ><span class="biblabel">
+ [2]<span class="bibsp">   </span></span><a 
+ id="Xantonell"></a>Riccardo       Antonelli,       Visualizing       a       Black       Hole
+   <a 
+href="http://spiro.fisica.unipd.it/~antonell/schwarzschild/" class="url" >http://spiro.fisica.unipd.it/~antonell/schwarzschild/</a>
+   </p>
+   <p class="bibitem" ><span class="biblabel">
+ [3]<span class="bibsp">   </span></span><a 
+ id="Xwikipedia:sch"></a>Wikipedia,                      Schwarzschild                      Geodesics
+   <a 
+href="https://en.wikipedia.org/wiki/Schwarzschild_geodesics" class="url" >https://en.wikipedia.org/wiki/Schwarzschild_geodesics</a>
+   </p>
+   <p class="bibitem" ><span class="biblabel">
+ [4]<span class="bibsp">   </span></span><a 
+ id="Xcie:data"></a>Munsell       Color       Science       Laboratory,       CIE       data
+   <a 
+href="http://www.cis.rit.edu/research/mcsl2/online/cie.php" class="url" >http://www.cis.rit.edu/research/mcsl2/online/cie.php</a>
+</p>
+   </div>
+<p>All web pages retrieved in December 2015. </p> 
+ 
+</body> 
+</html>
+                                                                          
+
+

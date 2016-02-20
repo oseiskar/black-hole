@@ -1,0 +1,23 @@
+body {
+
+    max-width: 750px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 2%;
+    font-size: 13pt;
+}
+
+a {
+    color: #337ab7;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Some fixes for default broken MathJax styles styles */
+.MJXc-display {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+}
