@@ -28,7 +28,7 @@
 \section*{Ray paths and gravitational lensing}
 
 As usual in raytracing, each sample (pixel) in the image corresponds to a path starting from the position $\mb p_0 = (x_0, y_0, z_0)$ of the camera, initially travelling to a direction $\mb d_0 \in \mathbb R^3$ specified by the camera coordinate system. The path represents photons arriving to the camera from that direction. 
-Instead of travelling in straight lines until hitting an object, the paths solve the photonic geodesic equation in the Schwarzschild space-time, which in certain units and spherical coordinates $(t,r,\theta,\phi)$ takes the form
+Instead of traveling in straight lines until hitting an object, the paths solve the photonic geodesic equation in the Schwarzschild space-time, which in certain units and spherical coordinates $(t,r,\theta,\phi)$ takes the form (cf. \cite[\S 4.2.1]{astro-princeton})
 $$
 %
     \d s^2 = \left(1-\frac1r\right)\d t^2 + \left(1-\frac1r\right)^{-1} \d r^2 - r^2(\d \theta^2-\sin^2\theta \cdot \d \phi^2) = 0.
@@ -97,7 +97,7 @@ When computing intersection between the planet and light paths, the motion of th
 
 \section*{Doppler shift and beaming}
 
-The \emph{Doppler factor} for light arriving to the observer from direction $\mb d$, emitted by a source moving at velocity $\mb v$ is \cite{astro-princeton}
+The \emph{Doppler factor} for light arriving to the observer from direction $\mb d$, emitted by a source moving at velocity $\mb v$ is \cite[\S 1.7]{astro-princeton}
 \begin{equation}\label{doppler-factor-moving-source}
   \delta = \gamma (1 + \mb d \cdot \mb v),
 \end{equation}
@@ -109,8 +109,13 @@ $$
 where $\mb d_o$ and $\mb d_s$ are the initial and final (at intersection with the light source) photon directions on the ray path. The velocities $\mb v_o$ and $\mb v_s$ of the observer and the source can be determined by \eqref{circular-orbit-angular-velocity}. All of these are given in the ``stationary'' Schwarzschild coordinate system.
 For the accretion disk, the velocity $\mb v_s$ is computed assuming the disk consists of glowing matter moving in circular orbits given by \eqref{circular-orbit-angular-velocity}.
 
-The wavelengths of the emitted and observed light are related by $\lambda_o = \delta \lambda_s$ and intensities by $I(\lambda_o) = \delta^{-3} I(\lambda_s)$ \cite{astro-princeton}.
-The perceived (RGB) colors corresponding to any fixed spectrum $I$ can be precomputed in a one-dimensional lookup table (texture) as a function of the Doppler factor. This is done by integrating the shifted spectra with respect to the standard CIE color sensitivity measures \cite{cie:data}.
+The wavelengths of the emitted and observed light are related by $\lambda_o = \delta \lambda_s$ and intensities by $I(\lambda_o) = \delta^{-3} I(\lambda_s)$ \cite{astro-princeton}. The change in intensity is called \emph{relativistic beaming} and the change in wavelength is Doppler shift, which is also commonly referred to as \emph{redshift} (when $\delta > 1$) or \emph{blueshift} ($\delta < 1$).
+
+The perceived (RGB) colors corresponding to any fixed spectrum $I$ can be precomputed in a one-dimensional lookup table (texture) as a function of the Doppler factor. This is done by integrating the shifted spectra with respect to the standard CIE color sensitivity measures \cite{cie:data}. The spectra used for the colors in this simulation are the black-body spectrum
+$$
+  I(\lambda) \propto \frac{2 h c^2}{\lambda^5}\frac1{e^{\frac{h c}{\lambda k_B T}} - 1}
+$$
+and hydrogen-$\alpha$: $I(\lambda) \propto \delta_{656.281 {\rm nm}}(\lambda)$.
 
 \clearpage
 \begin{thebibliography}{9}
