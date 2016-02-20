@@ -5,3 +5,9 @@ scratch.txt
 
 # not sure if the CIE data files are public
 data/*.csv
+
+# LaTeX stuff
+*.aux
+*.log
+*.out
+*.pdf

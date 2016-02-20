@@ -1,0 +1,135 @@
+
+\documentclass[a4paper,12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{hyperref}
+
+\def\mb{\boldsymbol}
+\def\d{{\rm d}}
+
+\hypersetup{%
+	pdftitle={Physics of oseiskar.github.io/black-hole},%
+	pdfauthor={Otto Seiskari},%
+	pdfsubject={},%
+	pdfkeywords={},%
+	pdfborder={0 0 0},%
+	colorlinks={false}%
+}
+
+\title{Physics of \href{https://oseiskar.github.io/black-hole}{\tt oseiskar.github.io/black-hole}}
+\author{Otto Seiskari}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section*{Ray paths and gravitational lensing}
+
+As usual in raytracing, each sample (pixel) in the image corresponds to a path starting from the position $\mb p_0 = (x_0, y_0, z_0)$ of the camera, initially travelling to a direction $\mb d_0 \in \mathbb R^3$ specified by the camera coordinate system. The path represents photons arriving to the camera from that direction. 
+Instead of travelling in straight lines until hitting an object, the paths solve the photonic geodesic equation in the Schwarzschild space-time, which in certain units and spherical coordinates $(t,r,\theta,\phi)$ takes the form
+$$
+%
+    \d s^2 = \left(1-\frac1r\right)\d t^2 + \left(1-\frac1r\right)^{-1} \d r^2 - r^2(\d \theta^2-\sin^2\theta \cdot \d \phi^2) = 0.
+$$
+
+Without loss of generality, one can fix $\theta = \frac\pi2$ and, even though not very obviously (see, e.g., \cite{wikipedia:sch} and \cite{antonell}), this gives the ordinary differential equation
+\begin{equation}\label{u-ode}
+    u''(\phi) = -u(\phi) \left(1-\frac32u^2(\phi)\right),
+\end{equation}
+for $u := 1/r$.
+To solve it in the raytracer, I use the initial conditions
+\def\n{\mb n}
+\def\p{\mb p_0}
+\def\v{\mb v}
+\def\t{\mb t}
+\def\bd{\mb d_0}
+$$
+%
+    u(0) = \frac1{\|\p\|}, \qquad \qquad
+    u'(0) = -u(0) \frac{\bd \cdot \n}{\bd \cdot \t},
+$$
+where
+\begin{equation}\label{n-and-t}
+    \n = \frac{\p}{\|\p\|}
+    \qquad \mbox{ and } \qquad
+    \t = \frac{(\n \times \bd) \times \n}{\|(\n \times \bd) \times \n\|}.
+\end{equation}
+span the plane in which the ray travels.
+
+Equation \eqref{u-ode} is integrated using the Leapfrog method until either a maximum number of steps $N$ is reached or $u_j + \Delta u_j < 0$, which signals that the ray escapes at an angle $\phi \in (\phi_j, \phi_j + \Delta \phi_j)$.
+
+Given $\phi$ and $u$, the corresponding spatial coordinates $\mb p = (x,y,z)$ can be computed from \eqref{n-and-t} as
+$$
+  \mb p = \left( \n \cos \phi  + \t \sin \phi\right) / u.
+$$
+The Schwarzschild time coordinate $t$ is resolved by amending the numerical integration with
+$$
+ t'(\phi) = -\frac{\sqrt{(u')^2 + u^2(1-u)}}{u^2(1-u)},
+$$
+which is needed to compute light travel times for simulating apparent positions of moving objects.
+In order to do the integration in a visually accurate way, the step size $\Delta \phi_j$ is varied using an \emph{ad hoc} formula, % TODO: insert the formula
+in addition to using the classical approximation $\d t^2 \approx \d x^2 + \d y^2 + \d z^2$ at large distances $r$ from the black hole.
+
+When the observer is moving with velocity $\mb v$ w.r.t. the Schwarzschild coordinate system, the ray directions $\mb d$ in the coordinate system of the observer (the camera coordinate system) are transformed by \emph{relativistic aberration}, which is corresponds to the Lorentz velocity transformation
+$$
+  \mb d_0 = \frac1{1 + v d_\parallel}\left((d_\parallel + v)\mb v^0 + \frac1{\gamma} \mb d_\perp\right)
+$$
+where $\mb v = \mb v^0 v$, $d_\parallel = \mb v^0 \cdot \mb d$, $\mb d_\perp = \mb d - \mb d_\parallel$ and
+\begin{equation}\label{lorentz-factor}
+  \gamma = 1/\sqrt{1-v^2}.
+\end{equation}
+
+\section*{Circular orbits}
+
+The observer (unless stationary) and the planet both move on circular orbits with angular velocities given by \cite{antonell}
+\begin{equation}\label{circular-orbit-angular-velocity}
+  \frac{\d \phi}{\d t} = \frac1{r\sqrt{2(r-1)}}.
+\end{equation}
+On such orbits, the time dilation of the observer relative to the planet is computed by updating the $t$-coordinate as
+$$
+  \Delta t = \sqrt{\frac{(\Delta t_0)^2  (1 - v^2)}{1-\frac1r}},
+$$
+where $\Delta t_0$ is the elapsed wall clock time between consecutive animation frames and $v = r \d \phi / \d t$. % TODO (not sure if the velocity is correct).
+
+When computing intersection between the planet and light paths, the motion of the planet has to be taken into account. Within the ODE integration steps, a ray-sphere intersection model can be used after mapping the ray to the moving coordinate system of the planet using a Lorentz velocity transformation.
+
+\section*{Doppler shift and beaming}
+
+The \emph{Doppler factor} for light arriving to the observer from direction $\mb d$, emitted by a source moving at velocity $\mb v$ is \cite{astro-princeton}
+\begin{equation}\label{doppler-factor-moving-source}
+  \delta = \gamma (1 + \mb d \cdot \mb v),
+\end{equation}
+where $\gamma$ is the Lorentz factor \eqref{lorentz-factor}.
+The Doppler factor for a ray path connecting a moving light source and a moving observer can be computed as
+$$
+ \delta = \delta_o \delta_s = \gamma_o \gamma_s (1 - \mb d_o \cdot \mb v_o)(1 + \mb d_s \cdot \mb v_s),
+$$
+where $\mb d_o$ and $\mb d_s$ are the initial and final (at intersection with the light source) photon directions on the ray path. The velocities $\mb v_o$ and $\mb v_s$ of the observer and the source can be determined by \eqref{circular-orbit-angular-velocity}. All of these are given in the ``stationary'' Schwarzschild coordinate system.
+For the accretion disk, the velocity $\mb v_s$ is computed assuming the disk consists of glowing matter moving in circular orbits given by \eqref{circular-orbit-angular-velocity}.
+
+The wavelengths of the emitted and observed light are related by $\lambda_o = \delta \lambda_s$ and intensities by $I(\lambda_o) = \delta^{-3} I(\lambda_s)$ \cite{astro-princeton}.
+The perceived (RGB) colors corresponding to any fixed spectrum $I$ can be precomputed in a one-dimensional lookup table (texture) as a function of the Doppler factor. This is done by integrating the shifted spectra with respect to the standard CIE color sensitivity measures \cite{cie:data}.
+
+\clearpage
+\begin{thebibliography}{9}
+
+\bibitem{astro-princeton} Jeremy Goodman, Topics in High-Energy Astrophysics
+\newblock \url{http://www.astro.princeton.edu/~jeremy/heap.pdf}
+
+\bibitem{antonell} Riccardo Antonelli, Visualizing a Black Hole
+\newblock \url{http://spiro.fisica.unipd.it/~antonell/schwarzschild/}
+
+\bibitem{wikipedia:sch} Wikipedia, Schwarzschild Geodesics
+\newblock \url{https://en.wikipedia.org/wiki/Schwarzschild_geodesics}
+
+\bibitem{cie:data} Munsell Color Science Laboratory, CIE data
+\newblock \url{http://www.cis.rit.edu/research/mcsl2/online/cie.php}
+
+
+\end{thebibliography}
+
+\noindent
+All web pages retrieved in December 2015.
+\end{document}
