@@ -6,7 +6,7 @@
 \usepackage{hyperref}
 
 \def\mb{\boldsymbol}
-\def\d{{\rm d}}
+\def\d{{\mathrm d}}
 
 \hypersetup{%
 	pdftitle={Physics of oseiskar.github.io/black-hole},%
@@ -27,7 +27,7 @@
 
 \section*{Ray paths and gravitational lensing}
 
-As usual in raytracing, each sample (pixel) in the image corresponds to a path starting from the position $\mb p_0 = (x_0, y_0, z_0)$ of the camera, initially travelling to a direction $\mb d_0 \in \mathbb R^3$ specified by the camera coordinate system. The path represents photons arriving to the camera from that direction. 
+As usual in raytracing, each sample (pixel) in the image corresponds to a path starting from the position ${\mb p}_0 = (x_0, y_0, z_0)$ of the camera, initially travelling to a direction $\mb d_0 \in \mathbb R^3$ specified by the camera coordinate system. The path represents photons arriving to the camera from that direction. 
 Instead of traveling in straight lines until hitting an object, the paths solve the photonic geodesic equation in the Schwarzschild space-time, which in certain units and spherical coordinates $(t,r,\theta,\phi)$ takes the form (cf. \cite[\S 4.2.1]{astro-princeton})
 $$
 %
@@ -41,10 +41,10 @@ Without loss of generality, one can fix $\theta = \frac\pi2$ and, even though no
 for $u := 1/r$.
 To solve it in the raytracer, I use the initial conditions
 \def\n{\mb n}
-\def\p{\mb p_0}
+\def\p{{\mb p}_0}
 \def\v{\mb v}
 \def\t{\mb t}
-\def\bd{\mb d_0}
+\def\bd{{\mb d}_0}
 $$
 %
     u(0) = \frac1{\|\p\|}, \qquad \qquad
@@ -59,7 +59,6 @@ where
 span the plane in which the ray travels.
 
 Equation \eqref{u-ode} is integrated using the Leapfrog method until either a maximum number of steps $N$ is reached or $u_j + \Delta u_j < 0$, which signals that the ray escapes at an angle $\phi \in (\phi_j, \phi_j + \Delta \phi_j)$.
-
 Given $\phi$ and $u$, the corresponding spatial coordinates $\mb p = (x,y,z)$ can be computed from \eqref{n-and-t} as
 $$
   \mb p = \left( \n \cos \phi  + \t \sin \phi\right) / u.
@@ -78,7 +77,7 @@ $$
 $$
 where $\mb v = \mb v^0 v$, $d_\parallel = \mb v^0 \cdot \mb d$, $\mb d_\perp = \mb d - \mb d_\parallel$ and
 \begin{equation}\label{lorentz-factor}
-  \gamma = 1/\sqrt{1-v^2}.
+  \gamma = \frac1{\sqrt{1-v^2}}.
 \end{equation}
 
 \section*{Circular orbits}
@@ -115,7 +114,7 @@ The perceived (RGB) colors corresponding to any fixed spectrum $I$ can be precom
 $$
   I(\lambda) \propto \frac{2 h c^2}{\lambda^5}\frac1{e^{\frac{h c}{\lambda k_B T}} - 1}
 $$
-and hydrogen-$\alpha$: $I(\lambda) \propto \delta_{656.281 {\rm nm}}(\lambda)$.
+and hydrogen-$\alpha$: $I(\lambda) \propto \delta_{656.281 {\mathrm{nm}}}(\lambda)$.
 
 \clearpage
 \begin{thebibliography}{9}
