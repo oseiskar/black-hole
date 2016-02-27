@@ -119,13 +119,7 @@ function Shader(mustacheTemplate) {
 function degToRad(a) { return Math.PI * a / 180.0; }
 
 (function(){
-    var textures = {
-        galaxy: null,
-        accretion_disk: null,
-        stars: null,
-        moon: null,
-        spectra: null
-    };
+    var textures = {};
 
     function whenLoaded() {
         init(textures);
@@ -146,25 +140,21 @@ function degToRad(a) { return Math.PI * a / 180.0; }
     });
 
     var texLoader = new THREE.TextureLoader();
-    texLoader.load('img/milkyway.jpg', function(tex) {
-        tex.magFilter = THREE.NearestFilter;
-        tex.minFilter = THREE.NearestFilter;
-        textures.galaxy = tex;
-        checkLoaded();
-    });
+    function loadTexture(symbol, filename, interpolation) {
+        textures[symbol] = null;
+        texLoader.load(filename, function(tex) {
+            tex.magFilter = interpolation;
+            tex.minFilter = interpolation;
+            textures[symbol] = tex;
+            checkLoaded();
+        });
+    }
 
-    texLoader.load('img/spectra.png', function(tex) {
-        tex.magFilter = THREE.NearestFilter;
-        tex.minFilter = THREE.NearestFilter;
-        textures.spectra = tex;
-        checkLoaded();
-    });
-
-    textures.moon = ProceduralTextures.beachBall();
-    textures.accretion_disk = ProceduralTextures.accretionDisk();
-    textures.stars = ProceduralTextures.starBackground();
-
-    checkLoaded();
+    loadTexture('galaxy', 'img/milkyway.jpg', THREE.NearestFilter);
+    loadTexture('spectra', 'img/spectra.png', THREE.LinearFilter);
+    loadTexture('moon', 'img/beach-ball.png', THREE.LinearFilter);
+    loadTexture('stars', 'img/stars.png', THREE.LinearFilter);
+    loadTexture('accretion_disk', 'img/accretion-disk.png', THREE.LinearFilter);
 })();
 
 var updateUniforms;
